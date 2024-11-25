@@ -1,11 +1,16 @@
-User story
+# User story
 
-- Employees who need the data (Botonists)
+## Employees who need the data (Botonists)
 
-- CTO
+## CTO
 CTO should be able to test the pipeline that shows if the code passes test, to see if any errors pop up upon deployment. We need test files for this.
 
 
-- People at the Museum
+## People at the Museum
+As a visitor to the museum, I want to see a live dashboard displaying the current health and environmental conditions of plants, so that I can learn about how plants respond to their environment and gain a deeper appreciation for their care.
 
+As a botanical researcher, I want to access long-term historical data about the environmental conditions and health of plants, so that I can study patterns, trends, and the impact of specific conditions on plant health over time.
+
+As a researcher, I want to download raw sensor data or processed datasets,
+so that I can use the data for detailed analysis, modelling, or publication in scientific studies.
 
