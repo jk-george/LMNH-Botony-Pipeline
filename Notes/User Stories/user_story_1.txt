@@ -3,6 +3,8 @@ User story
 - Employees who need the data (Botonists)
 
 - CTO
+CTO should be able to test the pipeline that shows if the code passes test, to see if any errors pop up upon deployment. We need test files for this.
+
 
 - People at the Museum
 
