@@ -27,13 +27,13 @@ def test_load_data(tmp_path):
 def test_drop_missing_data():
     """Test if rows with missing fields are removed."""
     data = [
-        {"name": "Rose", "scientific_name": "Rosa indica", "last_watered": "2024-01-01", "soil_moisture": 50, "temperature": 25, "origin_location": "India"},
-        {"name": "", "scientific_name": "Rosa alba", "soil_moisture": 45, "temperature": 20, "origin_location": "Pakistan"}
+        {"plant_name": "Rose", "scientific_name": "Rosa indica", "last_watered": "2024-01-01", "soil_moisture": 50, "temperature": 25, "origin_location": "India"},
+        {"plant_name": "", "scientific_name": "Rosa alba", "soil_moisture": 45, "temperature": 20, "origin_location": "Pakistan"}
     ]
     df = pd.DataFrame(data)
     cleaned_df = drop_missing_data(df)
     assert cleaned_df.shape == (1, 6)
-    assert cleaned_df['name'].iloc[0] == 'Rose'
+    assert cleaned_df['plant_name'].iloc[0] == 'Rose'
 
 def test_set_numeric_limits():
     """Test if rows outside the numeric limits are filtered out."""
@@ -75,7 +75,7 @@ def test_convert_dates():
 def test_filter_invalid_location():
     """Test if rows with empty origin_location are filtered out."""
     data = StringIO(
-        "name,scientific_name,last_watered,soil_moisture,temperature,origin_location\n"
+        "name,scientific_name,last_watered,soil_moisture,temperature,country_name\n"
         "Rose,Rosa indica,2024-01-01,50,25,India\n"
         "Tulip,Tulipa gesneriana,2024-01-01,45,20,\n"
     )

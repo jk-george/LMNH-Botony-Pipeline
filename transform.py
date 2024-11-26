@@ -27,7 +27,8 @@ def load_data(input_file: str) -> pd.DataFrame:
 
 def drop_missing_data(df: pd.DataFrame) -> pd.DataFrame:
     """Drops rows with missing fields."""
-    mandatory_fields = ['name', 'scientific_name', 'last_watered']
+    mandatory_fields = ['plant_name', 'scientific_name', 'country_name', 
+            'botanist_email', 'botanist_forename', 'botanist_surname', 'botanist_phone']
     initial_shape = df.shape
     df = df.dropna(subset=mandatory_fields)
     logging.info(
@@ -70,13 +71,25 @@ def convert_dates(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def filter_invalid_location(df: pd.DataFrame) -> pd.DataFrame:
-    """Drop rows that have an empty origin_location column"""
+    """Drop rows that have an empty country_name column."""
     initial_shape = df.shape
-    df = df[df['origin_location'].str.len() > 0]
+    df = df[df['country_name'].notnull()]
     logging.info(
-        f"Filtered rows with an empty 'origin_location'. "
+        f"Filtered rows with an empty 'country_name'. "
         f"Rows before: {initial_shape[0]}, Rows after: {df.shape[0]}"
     )
+    return df
+
+def validate_botanist_details(df: pd.DataFrame) -> pd.DataFrame:
+    """Validate and clean botanist details."""
+    botanist_fields = ['botanist_email', 'botanist_forename', 'botanist_surname', 'botanist_phone']
+    for field in botanist_fields:
+        if field in df.columns:
+            initial_non_empty = df[field].notnull().sum()
+            df[field] = df[field].str.strip()
+            logging.info(
+                f"Validated and cleaned botanist detail '{field}'. Non-empty values: {initial_non_empty}"
+            )
     return df
 
 def save_data(df: pd.DataFrame, output_file: str) -> None:
@@ -89,21 +102,24 @@ def save_data(df: pd.DataFrame, output_file: str) -> None:
         raise
 
 def main(input_file: str, output_file: str) -> None:
-    """Main function to carry out the transformation process"""
+    """Main function to carry out the transformation process."""
     logging.info("Data cleaning process started.")
     try:
         df = load_data(input_file)
         df = drop_missing_data(df)
         df = set_numeric_limits(df)
-        df = clean_text_fields(df, text_fields=['name', 'scientific_name', 'origin_location', 'botanist'])
+        df = clean_text_fields(df, text_fields=[
+            'plant_name', 'scientific_name', 'country_name', 
+            'botanist_email', 'botanist_forename', 'botanist_surname', 'botanist_phone'
+        ])
         df = convert_dates(df)
         df = filter_invalid_location(df)
+        df = validate_botanist_details(df)
         save_data(df, output_file)
         logging.info("Data cleaning process completed successfully.")
     except Exception as e:
         logging.error(f"Data cleaning process failed: {e}")
         raise
-
 
 if __name__ == '__main__':
     input_file = 'plants_data.csv'
