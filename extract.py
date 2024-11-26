@@ -3,7 +3,6 @@ import csv
 import json
 import argparse
 
-# Define the base URL for the API
 BASE_URL = "https://data-eng-plants-api.herokuapp.com/plants/"
 
 def fetch_plant_data(plant_id):
