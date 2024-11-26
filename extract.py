@@ -50,7 +50,7 @@ def fetch_all_plants(start_id=1, end_id=50):
 
     return plant_data
 
-def export_to_csv(data, output_file="./data/plants_data.csv"):
+def export_to_csv(data, output_file="./plants_data/plants_data.csv"):
     header_order = [
         "plant_id", 
         "plant_name", 
@@ -77,7 +77,7 @@ def export_to_csv(data, output_file="./data/plants_data.csv"):
 
     print(f"Data has been saved to '{output_file}'.")
 
-def export_to_json(data, output_file="./data/plants_data.json"):
+def export_to_json(data, output_file="./plants_data/plants_data.json"):
     with open(output_file, "w") as f:
         json.dump(data, f, indent=4)
     print(f"Data has been saved to '{output_file}'.")
@@ -100,11 +100,11 @@ def main():
     plant_data = fetch_all_plants()
 
     if args.format == "csv":
-        output_file = "./data/plants_data.csv"
+        output_file = "./plants_data/plants_data.csv"
         print("Exporting to .csv:")
         export_to_csv(plant_data, output_file)
     elif args.format == "json":
-        output_file = "./data/plants_data.json"
+        output_file = "./plants_data/plants_data.json"
         print("Exporting to .json:")
         export_to_json(plant_data, output_file)
 
