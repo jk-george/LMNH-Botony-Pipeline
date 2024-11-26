@@ -79,7 +79,7 @@ venv/
 .pytest_cache
 
 .terraform
-.tfvars
+*.tfvars
 
 .venv
 venv/
