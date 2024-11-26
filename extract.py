@@ -1,3 +1,4 @@
+"""Script to extract data from API to a .csv or .json file."""
 import requests
 import csv
 import json
@@ -5,7 +6,8 @@ import argparse
 
 BASE_URL = "https://data-eng-plants-api.herokuapp.com/plants/"
 
-def fetch_plant_data(plant_id):
+def fetch_plant_data(plant_id: int) -> dict:
+    """Feetech data for a specific plant by ID from the API specified."""
     url = f"{BASE_URL}{plant_id}"
     response = requests.get(url)
     if response.status_code == 200:
@@ -33,13 +35,14 @@ def fetch_plant_data(plant_id):
         print(f"Failed to fetch: Plant ID {plant_id}. - (Status Code: {response.status_code})")
         return None
 
-def get_all_keys(data):
+def get_all_keys(data: list) -> list:
     all_keys = set()
     for record in data:
         all_keys.update(record.keys())
     return list(all_keys)
 
-def fetch_all_plants(start_id=1, end_id=50):
+def fetch_all_plants(start_id: int=1, end_id: int=50) -> list:
+    """Fetch data for all plants within the given ID range."""
     plant_data = []
 
     for plant_id in range(start_id, end_id + 1):
@@ -50,7 +53,8 @@ def fetch_all_plants(start_id=1, end_id=50):
 
     return plant_data
 
-def export_to_csv(data, output_file="./plants_data/plants_data.csv"):
+def export_to_csv(data: list, output_file: str="./plants_data/plants_data.csv") -> None:
+    """Export the plant data to a CSV file."""
     header_order = [
         "plant_id", 
         "plant_name", 
@@ -77,12 +81,13 @@ def export_to_csv(data, output_file="./plants_data/plants_data.csv"):
 
     print(f"Data has been saved to '{output_file}'.")
 
-def export_to_json(data, output_file="./plants_data/plants_data.json"):
+def export_to_json(data: list, output_file: str = "./plants_data/plants_data.json") -> None:
+    """Export the plant data to a JSON file."""
     with open(output_file, "w") as f:
         json.dump(data, f, indent=4)
     print(f"Data has been saved to '{output_file}'.")
 
-def get_arguments():
+def get_arguments() -> argparse.Namespace:
     """Parse and return command-line arguments."""
     parser = argparse.ArgumentParser(description="Fetch plant data and export to CSV or JSON.")
     parser.add_argument(
@@ -94,7 +99,8 @@ def get_arguments():
 
     return parser.parse_args()
 
-def main():
+def main() -> None:
+    """Main function to fetch all plant data and export it based on user argument."""
     args = get_arguments()
 
     plant_data = fetch_all_plants()
