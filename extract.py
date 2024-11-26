@@ -11,10 +11,22 @@ def fetch_plant_data(plant_id):
     if response.status_code == 200:
         plant_data = response.json()
 
+        if "name" in plant_data:
+            plant_data["plant_name"] = plant_data.pop("name")
+
+        if "botanist" in plant_data and isinstance(plant_data["botanist"], dict):
+            botanist_data = plant_data.pop("botanist")
+            plant_data["botanist_email"] = botanist_data.get("email", "")
+            full_name = botanist_data.get("name", "").split()
+            plant_data["botanist_forename"] = full_name[0] if len(full_name) > 0 else ""
+            plant_data["botanist_surname"] = full_name[1] if len(full_name) > 1 else ""
+            plant_data["botanist_phone"] = botanist_data.get("phone", "")
+
         if "origin_location" in plant_data:
             origin_location = plant_data["origin_location"]
             if isinstance(origin_location, list) and len(origin_location) >= 4:
-                plant_data["origin_location"] = origin_location[3]
+                plant_data["country_name"] = origin_location[3]
+            del plant_data["origin_location"]
 
         return plant_data
     else:
@@ -39,7 +51,18 @@ def fetch_all_plants(start_id=1, end_id=50):
     return plant_data
 
 def export_to_csv(data, output_file="./data/plants_data.csv"):
-    header_order = ["plant_id", "name", "soil_moisture", "temperature", "last_watered"]
+    header_order = [
+        "plant_id", 
+        "plant_name", 
+        "soil_moisture", 
+        "temperature", 
+        "last_watered",
+        "botanist_email", 
+        "botanist_forename", 
+        "botanist_surname", 
+        "botanist_phone",
+        "country_name"
+    ]
 
     keys = get_all_keys(data)
     ordered_keys = [key for key in header_order if key in keys]
@@ -75,8 +98,6 @@ def main():
     args = get_arguments()
 
     plant_data = fetch_all_plants()
-
-    output_file="./data/plants_data.json"
 
     if args.format == "csv":
         output_file = "./data/plants_data.csv"
