@@ -4,16 +4,8 @@ import pymssql
 from connect_to_database import get_connection, get_cursor
 
 
-SQL_STATEMENT = """
-INSERT INTO sensor_data (
-    plant_id,
-    recording_taken,
-    last_watered,
-    soil_moisture,
-    temperature
-) OUTPUT INSERTED.sensor_data_id
-VALUES (%s, %s, %s, %s, %s)
-"""
+# def insert_sensor_data(conn, cursor):
+#     """Inserts sendor data to the schema"""
 
 
 def load_to_db(cleaned_csv: str) -> None:
@@ -25,15 +17,23 @@ def load_to_db(cleaned_csv: str) -> None:
         conn = get_connection()
         cursor = get_cursor(conn)
 
+        SQL_STATEMENT = """
+            INSERT INTO alpha.sensor_data (
+                plant_id,
+                recording_taken,
+                last_watered,
+                soil_moisture,
+                temperature
+            ) OUTPUT INSERTED.sensor_data_id
+            VALUES (%s, %s, %s, %s, %s)
+            """
+
         for _, row in df.iterrows():
             cursor.execute(
                 SQL_STATEMENT,
                 (
-
                     row['plant_id'],
-                    # 'YYYY-MM-DD HH:MM:SS' format
                     row['recording_taken'],
-                    # Ensure date is in 'YYYY-MM-DD HH:MM:SS' format
                     row['last_watered'],
                     row['soil_moisture'],
                     row['temperature']
@@ -51,13 +51,6 @@ def load_to_db(cleaned_csv: str) -> None:
     except Exception as e:
         logging.error(f"Failed to load data into the database: {e}")
         raise
-
-    finally:
-        # Close the cursor and connection
-        if 'cursor' in locals() and cursor:
-            cursor.close()
-        if 'conn' in locals() and conn:
-            conn.close()
 
 
 if __name__ == '__main__':
