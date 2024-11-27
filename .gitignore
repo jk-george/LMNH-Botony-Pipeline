@@ -89,6 +89,8 @@ venv/
 .env
 
 plants_data
+data_cleaning.log
+plants_data_cleaned.csv
 .python-version
 
 *.log
