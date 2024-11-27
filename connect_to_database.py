@@ -18,7 +18,7 @@ def configure_logging() -> None:
     )
 
 
-def get_connection() -> Connection | None:
+def get_connection() -> Connection:
     """Connects to RDS database using credentials"""
     try:
         conn = pymssql.connect(
