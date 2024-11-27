@@ -82,9 +82,11 @@ venv/
 .terraform
 *.tfvars
 
+venv
 .venv
 venv/
 
 .env
 
 plants_data
+.python-version
