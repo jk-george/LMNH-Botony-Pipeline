@@ -14,6 +14,10 @@ data "aws_ecs_cluster" "ecs_cluster" {
   cluster_name = var.ECS_CLUSTER_NAME
 }
 
+
+
+
+
 resource "aws_iam_role" "ecs_role" {
   name               = "connect4-ETL-task-exec-role"
   assume_role_policy = jsonencode({
@@ -57,7 +61,7 @@ resource "aws_ecs_task_definition" "etl-task-def" {
   task_role_arn            = aws_iam_role.ecs_role.arn
   container_definitions    = jsonencode([
     {
-      name      = "connect4-etl-task-container"
+      name      = var.ECR_NAME
       image     = format("%s:latest", data.aws_ecr_repository.ETL-ecr-repo.repository_url )
       essential = true
       cpu       = 256
@@ -66,7 +70,12 @@ resource "aws_ecs_task_definition" "etl-task-def" {
         {
           containerPort = 80
           hostPort      = 80
+        },
+        {
+          containerPort = 443
+          hostPort      = 443
         }
+
       ]
       environment = [
         {
@@ -130,11 +139,40 @@ resource "aws_iam_role_policy_attachment" "scheduler_logs_policy" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"  # To write logs to CloudWatch Logs
 }
 
+resource "aws_iam_role_policy_attachment" "scheduler_container_registry_readonly" {
+  role       = aws_iam_role.scheduler_ecs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+resource "aws_iam_role_policy_attachment" "scheduler_vpc_access" {
+  role       = aws_iam_role.scheduler_ecs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonVPCFullAccess"
+}
 
 resource "aws_scheduler_schedule_group" "connect4-schedule-group" {
   name = "connect4-schedule-group"
 }
 
+resource "aws_security_group" "task_exec_security_group"{
+  name        = "connect4-sg-etl-task"
+  description = "Allow inbound HTTPS traffic on port 443 from anywhere"
+  vpc_id      = var.VPC_ID  # Make sure to replace with your actual VPC ID
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Allows inbound HTTPS traffic from any IP
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"  # Allow all outbound traffic
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
 resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
   name       = "connect4-ETL-scheduler"
@@ -152,17 +190,17 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
 
 
     ecs_parameters {
-        task_definition_arn = aws_ecs_task_definition.etl-task-def.arn
-        task_count = 1
-        launch_type = "FARGATE"
+      task_definition_arn = aws_ecs_task_definition.etl-task-def.arn
+      task_count = 1
+      launch_type = "FARGATE"
+      group = "connect4-ETL-task"
 
-        network_configuration {
-        
-          assign_public_ip    = false
-          subnets             = var.SUBNET_IDS
-          security_groups     = [var.SECURITY_GROUP_ID]
-        }
-
+      network_configuration {
+      
+        assign_public_ip    = false
+        subnets             = var.SUBNET_IDS
+        security_groups     = [aws_security_group.task_exec_security_group.id]
+      }
     }
 
 
