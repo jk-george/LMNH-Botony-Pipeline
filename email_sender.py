@@ -3,27 +3,97 @@ import csv
 from datetime import datetime
 from dotenv import load_dotenv
 import os
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    filename='email_sender.log',
+    filemode='a'
+)
 
 load_dotenv()
 
-AWS_REGION = os.getenv('AWS_REGION')
-SES_SENDER_EMAIL = os.getenv('SES_SENDER_EMAIL')
-SES_RECEIVER_EMAIL = os.getenv('SES_RECEIVER_EMAIL')
-CSV_FILE_PATH = 'plants_data_cleaned.csv'
+def get_config():
+    """Fetches configuration settings for the application."""
+    return {
+        'aws_region': os.getenv('AWS_REGION'),
+        'ses_sender_email': os.getenv('SES_SENDER_EMAIL'),
+        'ses_receiver_email': os.getenv('SES_RECEIVER_EMAIL'),
+        'csv_file_path': 'plants_data_cleaned.csv',
+        'soil_moisture_threshold': 80,
+        'temperature_threshold': 15,
+    }
 
-SOIL_MOISTURE_THRESHOLD = 80
-TEMPERATURE_THRESHOLD = 15
-
-ses = boto3.client('ses', region_name=AWS_REGION)
+def get_ses_client(aws_region):
+    """Initializes and returns the SES client."""
+    return boto3.client('ses', region_name=aws_region)
 
 def read_csv(file_path):
     """Reads the CSV file and returns a list of plant health data."""
-    with open(file_path, 'r') as csvfile:
-        reader = csv.DictReader(csvfile)
-        data = [row for row in reader]
-    print(f"Read {len(data)} rows from {file_path}")
-    return data
+    try:
+        with open(file_path, 'r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            data = [row for row in reader]
+        logging.info(f"Read {len(data)} rows from {file_path}")
+        return data
+    except Exception as e:
+        logging.error(f"Failed to read CSV file {file_path}: {e}")
+        raise
 
-def send_email_alert(plant_data):
-    """Send an alert email to the botanist"""
+def send_email_alert(ses, sender_email, receiver_email, plant_data):
+    """Send an alert email to the botanist."""
     subject = f"Plant Health Alert for {plant_data['plant_name']}"
+    body = (
+        f"Dear {plant_data['botanist_forename']} {plant_data['botanist_surname']},\n\n"
+        f"We have detected an issue with the health of your plant:\n"
+        f"Plant Name: {plant_data['plant_name']} ({plant_data['scientific_name']})\n"
+        f"Plant ID: {plant_data['plant_id']}\n"
+        f"Country of Origin: {plant_data['country_name']}\n"
+        f"\nCurrent Conditions:\n"
+        f"- Soil Moisture: {plant_data['soil_moisture']}%\n"
+        f"- Temperature: {plant_data['temperature']}°C\n"
+        f"- Last Watered: {plant_data['last_watered']}\n"
+        f"\nRecommended Action: Please check the plant's environment and address the issue promptly.\n\n"
+        f"Best regards,\n"
+        f"The Plant Health Monitoring Team"
+    )
+    try:
+        ses.send_email(
+            Source=sender_email,
+            Destination={'ToAddresses': [receiver_email]},
+            Message={
+                'Subject': {'Data': subject},
+                'Body': {'Text': {'Data': body}}
+            }
+        )
+        logging.info(f"Alert email sent to {plant_data['botanist_email']} for plant {plant_data['plant_name']}")
+    except Exception as e:
+        logging.error(f"Failed to send email to {plant_data['botanist_email']}: {e}")
+
+def main():
+    """Main function to monitor plant health and send alerts."""
+    try:
+        config = get_config()
+        ses = get_ses_client(config['aws_region'])
+        plant_data_list = read_csv(config['csv_file_path'])
+
+        for plant_data in plant_data_list:
+            soil_moisture = float(plant_data['soil_moisture'])
+            temperature = float(plant_data['temperature'])
+
+            if soil_moisture > config['soil_moisture_threshold'] or temperature < config['temperature_threshold']:
+                logging.warning(f"Alert: Plant '{plant_data['plant_name']}' requires attention.")
+                send_email_alert(
+                    ses, 
+                    config['ses_sender_email'], 
+                    config['ses_receiver_email'], 
+                    plant_data
+                )
+            else:
+                logging.info(f"Plant '{plant_data['plant_name']}' is healthy.")
+    except Exception as e:
+        logging.error(f"Error occurred in main: {e}")
+
+if __name__ == '__main__':
+    main()
