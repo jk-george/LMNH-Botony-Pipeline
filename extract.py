@@ -1,4 +1,5 @@
 """Script to extract data from API to a .csv or .json file."""
+import os
 import requests
 import csv
 import json
@@ -101,6 +102,8 @@ def get_arguments() -> argparse.Namespace:
 
 def main() -> None:
     """Main function to fetch all plant data and export it based on user argument."""
+    os.makedirs("plants_data", exist_ok=True)
+
     args = get_arguments()
 
     plant_data = fetch_all_plants()
