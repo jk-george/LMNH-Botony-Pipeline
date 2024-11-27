@@ -1,66 +1,104 @@
+"""A script to move variable/changing data from a csv into the RDS."""
+import os
 import pandas as pd
-import logging
 import pymssql
-from connect_to_database import get_connection, get_cursor
+from typing import Optional, Set
+from pandas import DataFrame
 
 
-# def insert_sensor_data(conn, cursor):
-#     """Inserts sendor data to the schema"""
-
-
-def load_to_db(cleaned_csv: str) -> None:
-    """Loads cleaned data from a CSV file into the database."""
+def get_connection() -> Optional[pymssql.Connection]:
+    """Establish a connection to the RDS database."""
     try:
-        logging.info(f"Loading cleaned data from {cleaned_csv}.")
-        df = pd.read_csv(cleaned_csv)
+        conn = pymssql.connect(
+            server=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME"),
+            port=int(os.getenv("DB_PORT"))
+        )
+        return conn
+    except Exception as e:
+        print(f"Failed to connect to the database: {e}")
+        return None
 
-        conn = get_connection()
-        cursor = get_cursor(conn)
 
-        SQL_STATEMENT = """
+def clean_and_prepare_sensor_data(csv_file: str) -> DataFrame:
+    """Load and clean the sensor data from a CSV file."""
+    df = pd.read_csv(csv_file)
+    df["recording_taken"] = pd.to_datetime(
+        df["recording_taken"], errors="coerce")
+    df["last_watered"] = pd.to_datetime(df["last_watered"], errors="coerce")
+    df = df.dropna(subset=["recording_taken", "last_watered"])
+    df["recording_taken"] = df["recording_taken"].dt.tz_localize(None)
+    df["last_watered"] = df["last_watered"].dt.tz_localize(None)
+    return df
+
+
+def fetch_valid_plant_ids(conn: pymssql.Connection) -> Set[int]:
+    """Fetch valid plant IDs from the alpha.plant table."""
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT plant_id FROM alpha.plant;")
+            rows = cursor.fetchall()
+            return {row[0] for row in rows}
+    except Exception as e:
+        print(f"Failed to fetch valid plant IDs: {e}")
+        return set()
+
+
+def filter_valid_sensor_data(df: DataFrame, valid_plant_ids: Set[int]) -> DataFrame:
+    """Filter the sensor data to include only rows with valid plant IDs."""
+    return df[df["plant_id"].isin(valid_plant_ids)]
+
+
+def insert_sensor_data(conn: pymssql.Connection, sensor_data_df: DataFrame) -> None:
+    """Insert the sensor data into the alpha.sensor_data table."""
+    try:
+        with conn.cursor() as cur:
+            query = '''
             INSERT INTO alpha.sensor_data (
                 plant_id,
                 recording_taken,
-                last_watered,
                 soil_moisture,
-                temperature
-            ) OUTPUT INSERTED.sensor_data_id
-            VALUES (%s, %s, %s, %s, %s)
-            """
-
-        for _, row in df.iterrows():
-            cursor.execute(
-                SQL_STATEMENT,
+                temperature,
+                last_watered
+            ) VALUES (%s, %s, %s, %s, %s);
+            '''
+            data = [
                 (
-                    row['plant_id'],
-                    row['recording_taken'],
-                    row['last_watered'],
-                    row['soil_moisture'],
-                    row['temperature']
+                    row.plant_id,
+                    row.recording_taken,
+                    row.soil_moisture,
+                    row.temperature,
+                    row.last_watered
                 )
-            )
-            result = cursor.fetchone()
-            if result:
-                logging.info(f"Inserted record with sensor_data_id: {
-                             result['sensor_data_id']}")
-
-        # Commit the transaction
-        conn.commit()
-        logging.info("All data inserted successfully.")
-
+                for row in sensor_data_df.itertuples(index=False)
+            ]
+            cur.executemany(query, data)
+            conn.commit()
+            print(f"Inserted {len(data)} records into sensor_data.")
     except Exception as e:
-        logging.error(f"Failed to load data into the database: {e}")
-        raise
+        print(f"Error inserting data into sensor_data: {e}")
+        conn.rollback()
 
 
-if __name__ == '__main__':
-    # Specify the cleaned CSV file
-    cleaned_csv = 'plants_data_cleaned.csv'
-
-    logging.info("Starting data loading process.")
+def main(csv_file: str) -> None:
+    """Main function to load, clean, validate, and insert sensor data into the database."""
+    conn = get_connection()
+    if conn is None:
+        return
     try:
-        load_to_db(cleaned_csv)
-        logging.info("Data loading process completed successfully.")
+        sensor_data_df = clean_and_prepare_sensor_data(csv_file)
+        valid_plant_ids = fetch_valid_plant_ids(conn)
+        sensor_data_df = filter_valid_sensor_data(
+            sensor_data_df, valid_plant_ids)
+        insert_sensor_data(conn, sensor_data_df)
     except Exception as e:
-        logging.error(f"Data loading process failed: {e}")
-        raise
+        print(f"An error occurred: {e}")
+    finally:
+        conn.close()
+
+
+if __name__ == "__main__":
+    csv_file = "./plants_data/plants_data.csv"
+    main(csv_file)
