@@ -108,7 +108,41 @@ resource "aws_ecs_task_definition" "etl-task-def" {
 
 
 
+resource "aws_iam_role" "scheduler_ecs_role" {
+  name = "connect4-scheduler-ETL-role"
 
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Principal = {
+          Service = "scheduler.amazonaws.com"  # The service assuming the role
+        }
+        Effect = "Allow"
+      }
+    ]
+  })
+}
+
+
+# Attach the necessary policies to the IAM role
+resource "aws_iam_role_policy_attachment" "scheduler_ecs_role_policy" {
+  role       = aws_iam_role.scheduler_ecs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"  # Policy for ECS permissions
+}
+
+# Attach the IAM PassRole policy to allow the scheduler to pass roles to ECS tasks
+resource "aws_iam_role_policy_attachment" "scheduler_pass_role_policy" {
+  role       = aws_iam_role.scheduler_ecs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/iam:PassRole"  # Permission to pass roles to ECS
+}
+
+# Attach the CloudWatch Logs policy if your ECS tasks are writing logs
+resource "aws_iam_role_policy_attachment" "scheduler_logs_policy" {
+  role       = aws_iam_role.scheduler_ecs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"  # To write logs to CloudWatch Logs
+}
 
 
 resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
@@ -123,7 +157,7 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
 
   target {
     arn      = aws_ecs_cluster.ecs_cluster.arn
-    role_arn = aws_iam_role.ecs_role.arn
+    role_arn = aws_iam_role.scheduler_ecs_role.arn
 
 
     ecs_parameters {
@@ -132,7 +166,9 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
         launch_type = "FARGATE"
 
         network_configuration {
+          assign_public_ip    = false
           subnets             = aws_subnets.SUBNETS_IN_VPC.ids
+          security_groups     = [var.SECURITY_GROUP_ID]
         }
 
     }
