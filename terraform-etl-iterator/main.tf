@@ -6,17 +6,6 @@ data "aws_vpc" "VPC" {
   id = var.VPC_ID
 }
 
-data "aws_subnets" "SUBNETS_IN_VPC" {
-  filter {
-    name = "vpc-id"
-    values = [format("%s:%s",var.PUBLIC_TAG,var.VPC_ID)]
-  }
-}
-
-data "aws_security_group" "selected" {
-  id = var.SECURITY_GROUP_ID
-}
-
 data "aws_ecr_repository" "ETL-ecr-repo" {
     name = var.ECR_NAME
 }
@@ -167,8 +156,8 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
 
         network_configuration {
           assign_public_ip    = false
-          subnets             = data.aws_subnets.SUBNETS_IN_VPC.ids
-          security_groups     = [var.SECURITY_GROUP_ID]
+          subnets             = toset(data.aws_subnets.SUBNETS_IN_VPC.ids)
+          security_groups     = var.SUBNET_IDS
         }
 
     }

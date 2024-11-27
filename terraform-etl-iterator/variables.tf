@@ -23,7 +23,9 @@ variable SECURITY_GROUP_ID {
     description = " Holds Security Group ID from the VPC "
 }
 
-variable PUBLIC_TAG {
-    type = string
-    description = " The Public tag in front of a Public Subnet"
+
+
+variable SUBNET_IDS {
+    type = list(string)
+    description = " List of Public Subnet IDs "
 }

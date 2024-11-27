@@ -87,7 +87,7 @@ venv/
 
 .env
 *.terraform.*
-*.tfstate
+*.tfstate*
 plants_data
 
 local_test_files
