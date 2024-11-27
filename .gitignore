@@ -90,3 +90,5 @@ venv/
 
 plants_data
 .python-version
+
+*.log
