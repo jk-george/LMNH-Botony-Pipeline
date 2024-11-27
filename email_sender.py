@@ -1,3 +1,11 @@
+"""
+email_sender.py checks the plants_data_cleaned.csv file for any values outside
+of the specified range of 'healthy plant' (this can be changed within this script)
+and emails the botanist who has been assigned to the plant if the plant is classified
+as 'unhealthy'.
+Logging is also utilised to ensure a clear story can be told throughout the running of
+the script.
+"""
 import boto3
 import csv
 from datetime import datetime
@@ -21,7 +29,7 @@ def get_config():
         'ses_sender_email': os.getenv('SES_SENDER_EMAIL'),
         'ses_receiver_email': os.getenv('SES_RECEIVER_EMAIL'),
         'csv_file_path': 'plants_data_cleaned.csv',
-        'soil_moisture_threshold': 80,
+        'soil_moisture_threshold': 50,
         'temperature_threshold': 15,
     }
 
@@ -61,7 +69,7 @@ def send_email_alert(ses, sender_email, receiver_email, plant_data):
     try:
         ses.send_email(
             Source=sender_email,
-            Destination={'ToAddresses': [receiver_email]},
+            Destination={'ToAddresses': [plant_data['botanist_email']]},
             Message={
                 'Subject': {'Data': subject},
                 'Body': {'Text': {'Data': body}}
