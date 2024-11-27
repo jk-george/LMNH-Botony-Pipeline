@@ -4,22 +4,7 @@ import pandas as pd
 import pymssql
 from typing import Optional, Set
 from pandas import DataFrame
-
-
-def get_connection() -> Optional[pymssql.Connection]:
-    """Establish a connection to the RDS database."""
-    try:
-        conn = pymssql.connect(
-            server=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            port=int(os.getenv("DB_PORT"))
-        )
-        return conn
-    except Exception as e:
-        print(f"Failed to connect to the database: {e}")
-        return None
+from connect_to_database import get_connection
 
 
 def clean_and_prepare_sensor_data(csv_file: str) -> DataFrame:
@@ -31,6 +16,7 @@ def clean_and_prepare_sensor_data(csv_file: str) -> DataFrame:
     df = df.dropna(subset=["recording_taken", "last_watered"])
     df["recording_taken"] = df["recording_taken"].dt.tz_localize(None)
     df["last_watered"] = df["last_watered"].dt.tz_localize(None)
+
     return df
 
 
@@ -100,5 +86,5 @@ def main(csv_file: str) -> None:
 
 
 if __name__ == "__main__":
-    csv_file = "./plants_data/plants_data.csv"
+    csv_file = "plants_data_cleaned.csv"
     main(csv_file)
