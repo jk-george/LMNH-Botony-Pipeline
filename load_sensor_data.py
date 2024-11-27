@@ -1,14 +1,15 @@
 import pandas as pd
 import logging
 import pymssql
+from connect_to_database import get_connection, get_cursor
 
-# SQL statement for insertion
+
 SQL_STATEMENT = """
 INSERT INTO sensor_data (
-    plant_id, 
-    recording_taken, 
-    last_watered, 
-    soil_moisture, 
+    plant_id,
+    recording_taken,
+    last_watered,
+    soil_moisture,
     temperature
 ) OUTPUT INSERTED.sensor_data_id
 VALUES (%s, %s, %s, %s, %s)
@@ -20,10 +21,9 @@ def load_to_db(cleaned_csv: str) -> None:
     try:
         logging.info(f"Loading cleaned data from {cleaned_csv}.")
         df = pd.read_csv(cleaned_csv)
-        logging.info(f"Loaded cleaned data. Shape: {df.shape}")
 
-        conn = pymssql.connect(server, username, password, database)
-        cursor = conn.cursor(as_dict=True)
+        conn = get_connection()
+        cursor = get_cursor(conn)
 
         for _, row in df.iterrows():
             cursor.execute(
@@ -35,8 +35,8 @@ def load_to_db(cleaned_csv: str) -> None:
                     row['recording_taken'],
                     # Ensure date is in 'YYYY-MM-DD HH:MM:SS' format
                     row['last_watered'],
-                    row['soil_moisture'],     # Soil moisture value
-                    row['temperature']        # Temperature value
+                    row['soil_moisture'],
+                    row['temperature']
                 )
             )
             result = cursor.fetchone()
