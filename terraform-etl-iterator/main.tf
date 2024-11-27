@@ -3,6 +3,12 @@ provider "aws" {
 }
 
 
+data "aws_ecr_repository" "ETL-ecr" {
+    name = var.ECR_NAME
+}
+
+
+
 resource "aws_iam_role" "ecs_role" {
   name               = "connect4-ETL-task-exec-role"
   assume_role_policy = jsonencode({
@@ -33,6 +39,46 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_logs_full_access" {
   role       = aws_iam_role.ecs_role.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }
+
+
+resource "aws_ecs_task_definition" "etl-task-def" {
+  family                   = "connect4-ETL-task"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 256
+  memory                   = 512
+  execution_role_arn       = aws_iam_role.ecs_role.arn
+  task_role_arn            = aws_iam_role.ecs_role.arn
+  container_definitions    = jsonencode([
+    {
+      name      = "connect4-etl-task-container"
+      image     = var.IMAGE_NAME
+      essential = true
+      cpu       = 256
+      memory    = 512
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+        }
+      ]
+    }
+  ])
+
+  volume {
+    name      = "service-storage"
+    host_path = "/ecs/service-storage"
+  }
+
+  runtime_platform {
+    operating_system_family = "WINDOWS_SERVER_2019_CORE"
+    cpu_architecture        = "X86_64"
+  }
+}
+
+
+
+
 
 
 
