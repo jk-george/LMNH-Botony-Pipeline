@@ -84,6 +84,7 @@ resource "aws_ecs_task_definition" "etl-task-def" {
           "awslogs-group"         = "/ecs/connect4-ETL-task"
           "awslogs-region"        = "eu-west-2"
           "awslogs-stream-prefix" = "ecs"
+          "awslogs-create-group"  = "true"
         }
       }
     }
