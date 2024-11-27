@@ -20,9 +20,10 @@ resource "aws_iam_role" "ecs_role" {
     Version = "2012-10-17"
     Statement = [
       {
+        Sid       = ""
         Action    = "sts:AssumeRole"
         Principal = {
-          Service = "ecs.amazonaws.com"
+          Service = "ecs-tasks.amazonaws.com"
         }
         Effect    = "Allow"
       }
@@ -155,9 +156,10 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
         launch_type = "FARGATE"
 
         network_configuration {
+        
           assign_public_ip    = false
-          subnets             = toset(data.aws_subnets.SUBNETS_IN_VPC.ids)
-          security_groups     = var.SUBNET_IDS
+          subnets             = var.SUBNET_IDS
+          security_groups     = [var.SECURITY_GROUP_ID]
         }
 
     }
