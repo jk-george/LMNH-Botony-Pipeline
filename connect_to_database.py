@@ -1,14 +1,15 @@
 """Connects to RDS database using credentials"""
 import pymssql
+from pymssql import Connection, Cursor
 import os
 import logging
 from dotenv import load_dotenv
 
 
-schema_name = os.getenv("SCHEMA_NAME")
+SCHEMA = os.getenv("SCHEMA_NAME")
 
 
-def configure_logging():
+def configure_logging() -> None:
     """Configuring logging"""
     logging.basicConfig(
         filename='db_connection.log',
@@ -17,7 +18,7 @@ def configure_logging():
     )
 
 
-def get_connection():
+def get_connection() -> Connection | None:
     """Connects to RDS database using credentials"""
     try:
         conn = pymssql.connect(
@@ -34,7 +35,7 @@ def get_connection():
         return None
 
 
-def get_cursor(conn):
+def get_cursor(conn: Connection) -> Cursor:
     """Returns cursor"""
     return conn.cursor(as_dict=True)
 
