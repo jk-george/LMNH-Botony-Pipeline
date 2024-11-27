@@ -7,7 +7,9 @@ data "aws_ecr_repository" "ETL-ecr" {
     name = var.ECR_NAME
 }
 
-
+data "aws_ecs_cluster" "ecs_cluster" {
+  cluster_name = var.ECS_CLUSTER_NAME
+}
 
 resource "aws_iam_role" "ecs_role" {
   name               = "connect4-ETL-task-exec-role"
@@ -106,7 +108,7 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
   schedule_expression = "cron(* * ? * * *)"
 
   target {
-    arn      = aws_sqs_queue.example.arn
-    role_arn = aws_iam_role.example.arn
+    arn      = aws_ecs_cluster.ecs_cluster.arn
+    role_arn = aws_iam_role.ecs_role.arn
   }
 }
