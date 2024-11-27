@@ -9,7 +9,7 @@ data "aws_vpc" "VPC" {
 data "aws_subnets" "SUBNETS_IN_VPC" {
   filter {
     name = "vpc-id"
-    values = [var.VPC_ID]
+    values = [format("%s:%s",var.PUBLIC_TAG,var.VPC_ID)]
   }
 }
 

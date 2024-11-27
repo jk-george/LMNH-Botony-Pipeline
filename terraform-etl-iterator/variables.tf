@@ -22,3 +22,8 @@ variable SECURITY_GROUP_ID {
     type = string
     description = " Holds Security Group ID from the VPC "
 }
+
+variable PUBLIC_TAG {
+    type = string
+    description = " The Public tag in front of a Public Subnet"
+}
