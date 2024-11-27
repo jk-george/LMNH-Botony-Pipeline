@@ -62,16 +62,29 @@ resource "aws_ecs_task_definition" "etl-task-def" {
           hostPort      = 80
         }
       ]
+      environment = [
+        {
+          name  = "ENV_VAR_NAME"
+          value = "some_value"
+        },
+        {
+          name  = "ANOTHER_ENV_VAR"
+          value = "another_value"
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/connect4-ETL-task"
+          "awslogs-region"        = "eu-west-2"
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
     }
   ])
 
-  volume {
-    name      = "service-storage"
-    host_path = "/ecs/service-storage"
-  }
-
   runtime_platform {
-    operating_system_family = "WINDOWS_SERVER_2019_CORE"
+    operating_system_family = "LINUX"
     cpu_architecture        = "X86_64"
   }
 }
