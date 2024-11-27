@@ -63,6 +63,9 @@ def convert_dates(df: pd.DataFrame) -> pd.DataFrame:
     """Convert the last_watered column to datetime and drop rows which don't comply with this."""
     initial_shape = df.shape
     df['last_watered'] = pd.to_datetime(df['last_watered'], errors='coerce')
+    if df['last_watered'].dt.tz is not None:
+        df['last_watered'] = df['last_watered'].dt.tz_localize(None)
+
     df = df.dropna(subset=['last_watered'])
     logging.info(
         f"Converted 'last_watered' to datetime and dropped invalid rows. "
