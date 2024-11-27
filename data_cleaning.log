@@ -1,0 +1,20 @@
+2024-11-27 12:20:32,508 - INFO - Data cleaning process started.
+2024-11-27 12:20:32,508 - INFO - Loading data from ./plants_data/plants_data.csv.
+2024-11-27 12:20:32,511 - INFO - Data loaded successfully.
+2024-11-27 12:20:32,514 - INFO - Dropped rows with missing mandatory fields ['plant_name', 'scientific_name', 'country_name', 'botanist_email', 'botanist_forename', 'botanist_surname', 'botanist_phone']. Rows before: 47, Rows after: 36
+2024-11-27 12:20:32,514 - INFO - Filtered with limits on 'soil_moisture' (0-100) and 'temperature' (-10 to 50). Rows before: 36, Rows after: 36
+2024-11-27 12:20:32,515 - INFO - Cleaned whitespace in column 'plant_name'. Non-empty values: 36
+2024-11-27 12:20:32,515 - INFO - Cleaned whitespace in column 'scientific_name'. Non-empty values: 36
+2024-11-27 12:20:32,515 - INFO - Cleaned whitespace in column 'country_name'. Non-empty values: 36
+2024-11-27 12:20:32,515 - INFO - Cleaned whitespace in column 'botanist_email'. Non-empty values: 36
+2024-11-27 12:20:32,515 - INFO - Cleaned whitespace in column 'botanist_forename'. Non-empty values: 36
+2024-11-27 12:20:32,516 - INFO - Cleaned whitespace in column 'botanist_surname'. Non-empty values: 36
+2024-11-27 12:20:32,516 - INFO - Cleaned whitespace in column 'botanist_phone'. Non-empty values: 36
+2024-11-27 12:20:32,541 - INFO - Converted 'last_watered' to datetime and dropped invalid rows. Rows before: 36, Rows after: 36
+2024-11-27 12:20:32,541 - INFO - Filtered rows with an empty 'country_name'. Rows before: 36, Rows after: 36
+2024-11-27 12:20:32,542 - INFO - Validated and cleaned botanist detail 'botanist_email'. Non-empty values: 36
+2024-11-27 12:20:32,542 - INFO - Validated and cleaned botanist detail 'botanist_forename'. Non-empty values: 36
+2024-11-27 12:20:32,542 - INFO - Validated and cleaned botanist detail 'botanist_surname'. Non-empty values: 36
+2024-11-27 12:20:32,542 - INFO - Validated and cleaned botanist detail 'botanist_phone'. Non-empty values: 36
+2024-11-27 12:20:32,545 - INFO - Data saved successfully to plants_data_cleaned.csv. Final shape: (36, 13)
+2024-11-27 12:20:32,545 - INFO - Data cleaning process completed successfully.
