@@ -8,7 +8,6 @@ the script.
 """
 import boto3
 import csv
-from datetime import datetime
 from dotenv import load_dotenv
 import os
 import logging
@@ -27,7 +26,6 @@ def get_config():
     return {
         'aws_region': os.getenv('AWS_REGION'),
         'ses_sender_email': os.getenv('SES_SENDER_EMAIL'),
-        'ses_receiver_email': os.getenv('SES_RECEIVER_EMAIL'),
         'csv_file_path': 'plants_data_cleaned.csv',
         'soil_moisture_threshold': 50,
         'temperature_threshold': 15,
