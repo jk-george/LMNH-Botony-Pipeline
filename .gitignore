@@ -88,3 +88,5 @@ venv/
 .env
 
 plants_data
+
+local_test_files

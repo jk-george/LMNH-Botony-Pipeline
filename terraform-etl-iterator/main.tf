@@ -17,7 +17,7 @@ data "aws_security_group" "selected" {
   id = var.SECURITY_GROUP_ID
 }
 
-data "aws_ecr_repository" "ETL-ecr" {
+data "aws_ecr_repository" "ETL-ecr-repo" {
     name = var.ECR_NAME
 }
 
@@ -68,7 +68,7 @@ resource "aws_ecs_task_definition" "etl-task-def" {
   container_definitions    = jsonencode([
     {
       name      = "connect4-etl-task-container"
-      image     = var.IMAGE_NAME
+      image     = format("%s:latest", data.aws_ecr_repository.ETL-ecr-repo.repository_url )
       essential = true
       cpu       = 256
       memory    = 512
@@ -132,11 +132,6 @@ resource "aws_iam_role_policy_attachment" "scheduler_ecs_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"  # Policy for ECS permissions
 }
 
-# Attach the IAM PassRole policy to allow the scheduler to pass roles to ECS tasks
-resource "aws_iam_role_policy_attachment" "scheduler_pass_role_policy" {
-  role       = aws_iam_role.scheduler_ecs_role.name
-  policy_arn = "arn:aws:iam::aws:policy/iam:PassRole"  # Permission to pass roles to ECS
-}
 
 # Attach the CloudWatch Logs policy if your ECS tasks are writing logs
 resource "aws_iam_role_policy_attachment" "scheduler_logs_policy" {
@@ -145,9 +140,14 @@ resource "aws_iam_role_policy_attachment" "scheduler_logs_policy" {
 }
 
 
+resource "aws_scheduler_schedule_group" "connect4-schedule-group" {
+  name = "connect4-schedule-group"
+}
+
+
 resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
   name       = "connect4-ETL-scheduler"
-  group_name = "connect4-schedule-group"
+  group_name = aws_scheduler_schedule_group.connect4-schedule-group.id
 
   flexible_time_window {
     mode = "OFF"
@@ -156,7 +156,7 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
   schedule_expression = "cron(* * ? * * *)"
 
   target {
-    arn      = aws_ecs_cluster.ecs_cluster.arn
+    arn      = data.aws_ecs_cluster.ecs_cluster.arn
     role_arn = aws_iam_role.scheduler_ecs_role.arn
 
 
@@ -167,7 +167,7 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
 
         network_configuration {
           assign_public_ip    = false
-          subnets             = aws_subnets.SUBNETS_IN_VPC.ids
+          subnets             = data.aws_subnets.SUBNETS_IN_VPC.ids
           security_groups     = [var.SECURITY_GROUP_ID]
         }
 
