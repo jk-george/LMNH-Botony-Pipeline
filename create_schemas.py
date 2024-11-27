@@ -1,5 +1,6 @@
 """Executes schema SQL script to set up the database schema"""
 import logging
+from dotenv import load_dotenv
 from connect_to_database import get_connection, get_cursor
 
 
@@ -35,5 +36,7 @@ def run_schema_script() -> None:
 
 
 if __name__ == "__main__":
+    load_dotenv()
+
     configure_logging()
     run_schema_script()
