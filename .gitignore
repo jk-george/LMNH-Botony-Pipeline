@@ -82,6 +82,7 @@ venv/
 .terraform
 *.tfvars
 
+venv
 .venv
 venv/
 
@@ -90,3 +91,6 @@ venv/
 plants_data
 data_cleaning.log
 plants_data_cleaned.csv
+.python-version
+
+*.log
