@@ -13,6 +13,10 @@ data "aws_subnets" "SUBNETS_IN_VPC" {
   }
 }
 
+data "aws_security_group" "selected" {
+  id = var.SECURITY_GROUP_ID
+}
+
 data "aws_ecr_repository" "ETL-ecr" {
     name = var.ECR_NAME
 }

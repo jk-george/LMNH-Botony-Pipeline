@@ -17,3 +17,8 @@ variable VPC_ID {
     type = string
     description = " Holds VPC ID "
 }
+
+variable SECURITY_GROUP_ID {
+    type = string
+    description = " Holds Security Group ID from the VPC "
+}
