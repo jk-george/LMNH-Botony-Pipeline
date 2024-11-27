@@ -1,28 +1,28 @@
 -- Drop database schema if it exists
+IF OBJECT_ID('sensor_data', 'U') IS NOT NULL DROP TABLE sensor_data;
+IF OBJECT_ID('plant', 'U') IS NOT NULL DROP TABLE plant;
 IF OBJECT_ID('plant_species', 'U') IS NOT NULL DROP TABLE plant_species;
 IF OBJECT_ID('country', 'U') IS NOT NULL DROP TABLE country;
 IF OBJECT_ID('botanist', 'U') IS NOT NULL DROP TABLE botanist;
-IF OBJECT_ID('plant', 'U') IS NOT NULL DROP TABLE plant;
-IF OBJECT_ID('sensor_data', 'U') IS NOT NULL DROP TABLE sensor_data;
 
 
 CREATE TABLE plant_species (
     scientific_name_id INT IDENTITY(1,1) PRIMARY KEY,
-    plant_name VARCHAR(100),
-    scientific_name VARCHAR(100)
+    plant_name VARCHAR(100) NOT NULL,
+    scientific_name VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE country (
     country_id INT IDENTITY(1,1) PRIMARY KEY,
-    country_name VARCHAR(100)
+    country_name VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE botanist (
     botanist_id INT IDENTITY(1,1) PRIMARY KEY,
-    botanist_email VARCHAR(100),
-    botanist_forename VARCHAR(100),
-    botanist_surname VARCHAR(100),
-    botanist_phone VARCHAR(20)
+    botanist_email VARCHAR(100) NOT NULL,
+    botanist_forename VARCHAR(100) NOT NULL,
+    botanist_surname VARCHAR(100) NOT NULL,
+    botanist_phone VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE plant (
