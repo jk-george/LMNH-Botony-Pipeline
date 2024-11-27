@@ -60,15 +60,21 @@ def clean_text_fields(df: pd.DataFrame, text_fields: list[str]) -> pd.DataFrame:
     return df
 
 def convert_dates(df: pd.DataFrame) -> pd.DataFrame:
-    """Convert the last_watered column to datetime and drop rows which don't comply with this."""
+    """Convert datetime columns and drop rows with invalid values."""
     initial_shape = df.shape
+
     df['last_watered'] = pd.to_datetime(df['last_watered'], errors='coerce')
     if df['last_watered'].dt.tz is not None:
         df['last_watered'] = df['last_watered'].dt.tz_localize(None)
 
-    df = df.dropna(subset=['last_watered'])
+    if 'recording_taken' in df.columns:
+        df['recording_taken'] = pd.to_datetime(df['recording_taken'], errors='coerce')
+        if df['recording_taken'].dt.tz is not None:
+            df['recording_taken'] = df['recording_taken'].dt.tz_localize(None)
+
+    df = df.dropna(subset=['last_watered', 'recording_taken'])
     logging.info(
-        f"Converted 'last_watered' to datetime and dropped invalid rows. "
+        f"Converted datetime columns and dropped invalid rows. "
         f"Rows before: {initial_shape[0]}, Rows after: {df.shape[0]}"
     )
     return df
