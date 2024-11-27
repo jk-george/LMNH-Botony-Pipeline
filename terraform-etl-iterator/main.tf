@@ -2,6 +2,16 @@ provider "aws" {
   region = "eu-west-2"  # Specify the AWS region (modify as needed)
 }
 
+data "aws_vpc" "VPC" {
+  id = var.VPC_ID
+}
+
+data "aws_subnets" "SUBNETS_IN_VPC" {
+  filter {
+    name = "vpc-id"
+    values = [var.VPC_ID]
+  }
+}
 
 data "aws_ecr_repository" "ETL-ecr" {
     name = var.ECR_NAME
@@ -110,5 +120,19 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
   target {
     arn      = aws_ecs_cluster.ecs_cluster.arn
     role_arn = aws_iam_role.ecs_role.arn
+
+
+    ecs_parameters {
+        task_definition_arn = aws_ecs_task_definition.etl-task-def.arn
+        task_count = 1
+        launch_type = "FARGATE"
+
+        network_configuration {
+          subnets             = aws_subnets.SUBNETS_IN_VPC.ids
+        }
+
+    }
+
+
   }
 }

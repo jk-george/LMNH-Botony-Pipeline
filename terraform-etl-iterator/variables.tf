@@ -12,3 +12,8 @@ variable ECS_CLUSTER_NAME {
     type = string
     description = " Holds the ECS Cluster name "
 }
+
+variable VPC_ID {
+    type = string
+    description = " Holds VPC ID "
+}
