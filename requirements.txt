@@ -2,4 +2,4 @@ pymssql
 python-dotenv
 requests
 pandas
-pymysql
+boto3
