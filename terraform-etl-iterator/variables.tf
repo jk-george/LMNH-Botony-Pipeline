@@ -14,13 +14,6 @@ variable VPC_ID {
     description = " Holds VPC ID "
 }
 
-variable SECURITY_GROUP_ID {
-    type = string
-    description = " Holds Security Group ID from the VPC "
-}
-
-
-
 variable SUBNET_IDS {
     type = list(string)
     description = " List of Public Subnet IDs "
