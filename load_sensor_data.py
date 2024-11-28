@@ -68,7 +68,7 @@ def insert_sensor_data(conn: pymssql.Connection, sensor_data_df: DataFrame) -> N
         conn.rollback()
 
 
-def main(csv_file: str) -> None:
+def main_load(csv_file: str) -> None:
     """Main function to load, clean, validate, and insert sensor data into the database."""
     conn = get_connection()
     if conn is None:
@@ -87,4 +87,4 @@ def main(csv_file: str) -> None:
 
 if __name__ == "__main__":
     csv_file = "plants_data_cleaned.csv"
-    main(csv_file)
+    main_load(csv_file)

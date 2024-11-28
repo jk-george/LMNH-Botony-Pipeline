@@ -122,7 +122,7 @@ def save_data(df: pd.DataFrame, output_file: str) -> None:
         raise
 
 
-def main(input_file: str, output_file: str) -> None:
+def main_transform(input_file: str, output_file: str) -> None:
     """Main function to carry out the transformation process."""
     logging.info("Data cleaning process started.")
     try:
@@ -146,4 +146,4 @@ def main(input_file: str, output_file: str) -> None:
 if __name__ == '__main__':
     input_file = './plants_data/plants_data.csv'
     output_file = 'plants_data_cleaned.csv'
-    main(input_file, output_file)
+    main_transform(input_file, output_file)

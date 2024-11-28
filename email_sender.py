@@ -90,7 +90,7 @@ def check_and_alert_unhealthy_plants(plant_data_list: list[dict], ses: BaseClien
         except ValueError as e:
             logging.error(f"Invalid data format in plant entry: {e}")
 
-def main() -> None:
+def main_email_alerts() -> None:
     """Main function to monitor plant health and send alerts."""
     try:
         logging.basicConfig(
@@ -99,7 +99,7 @@ def main() -> None:
             filename='email_sender.log',
             filemode='a'
         )
-        load_dotenv()
+       
 
         config = get_config()
         ses = get_ses_client(config['aws_region'])
@@ -110,5 +110,6 @@ def main() -> None:
         logging.error(f"Error occurred in main: {e}")
 
 if __name__ == '__main__':
-    main()
+    load_dotenv()
+    main_email_alerts()
 
