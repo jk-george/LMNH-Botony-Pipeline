@@ -82,6 +82,7 @@ venv/
 .terraform
 *.tfvars
 
+venv
 .venv
 venv/
 
@@ -90,4 +91,13 @@ venv/
 *.tfstate*
 plants_data
 
+
 local_test_files
+
+plants_data
+data_cleaning.log
+plants_data_*
+.python-version
+
+*.log
+
