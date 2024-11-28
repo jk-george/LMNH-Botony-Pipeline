@@ -48,6 +48,12 @@ WHERE TABLE_SCHEMA = 'alpha' AND TABLE_TYPE = 'BASE TABLE';`
 (follow each command with `GO`)
 - To leave session run `quit`
 
+- To see all tables and their elements:
+SELECT * FROM alpha.plant_species;
+SELECT * FROM alpha.country;
+SELECT * FROM alpha.botanist;
+SELECT * FROM alpha.plant;
+SELECT * FROM alpha.sensor_data;
 
 ## 🗂️ Files Explained
 ...
