@@ -59,7 +59,7 @@ def send_email_alert(ses: BaseClient, sender_email: str, plant_data: dict[str, s
     try:
         ses.send_email(
             Source=sender_email,
-            Destination={'ToAddresses': ['trainee.emily.curtis@sigmalabs.co.uk']},
+            Destination={'ToAddresses': [plant_data['botanist_email']]},
             Message={
                 'Subject': {'Data': subject},
                 'Body': {'Text': {'Data': body}}
