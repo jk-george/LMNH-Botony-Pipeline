@@ -24,7 +24,7 @@ CREATE TABLE alpha.botanist (
 );
 
 CREATE TABLE alpha.plant (
-    plant_id INT IDENTITY(1,1) PRIMARY KEY,
+    plant_id INT PRIMARY KEY,
     scientific_name_id INT,
     country_id INT,
     botanist_id INT,
