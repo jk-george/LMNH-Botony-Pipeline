@@ -37,10 +37,10 @@ def insert_data(conn, table: str, data: list, columns: list, identity_insert=Fal
             VALUES ({placeholders});
             """
             cur.executemany(query, data)
-            
+
             if identity_insert:
                 cur.execute(f"SET IDENTITY_INSERT {table} OFF;")
-            
+
             conn.commit()
             print(f"Inserted {len(data)} records into {table}.")
     except Exception as e:
@@ -64,30 +64,40 @@ def insert_countries(conn, df):
     """Insert data into the 'country' table."""
     countries = df["country_name"].dropna().unique()
     country_data = [(i + 1, country) for i, country in enumerate(countries)]
-    insert_data(conn, "alpha.country", country_data, ["country_id", "country_name"], identity_insert=True)
+    insert_data(conn, "alpha.country", country_data, [
+                "country_id", "country_name"], identity_insert=True)
 
 
 def insert_botanists(conn, df):
     """Insert data into the 'botanist' table."""
-    botanists = df[["botanist_email", "botanist_forename", "botanist_surname", "botanist_phone"]].drop_duplicates()
-    botanist_data = [(i + 1, *row) for i, row in enumerate(botanists.to_records(index=False).tolist())]
-    insert_data(conn, "alpha.botanist", botanist_data, ["botanist_id", "botanist_email", "botanist_forename", "botanist_surname", "botanist_phone"], identity_insert=True)
+    botanists = df[["botanist_email", "botanist_forename",
+                    "botanist_surname", "botanist_phone"]].drop_duplicates()
+    botanist_data = [(i + 1, *row)
+                     for i, row in enumerate(botanists.to_records(index=False).tolist())]
+    insert_data(conn, "alpha.botanist", botanist_data, [
+                "botanist_id", "botanist_email", "botanist_forename", "botanist_surname", "botanist_phone"], identity_insert=True)
 
 
 def insert_plant_species(conn, df):
     """Insert data into the 'plant_species' table."""
     plant_species = df[["plant_name", "scientific_name"]].drop_duplicates()
-    plant_species_data = [(i + 1, *row) for i, row in enumerate(plant_species.to_records(index=False).tolist())]
-    insert_data(conn, "alpha.plant_species", plant_species_data, ["scientific_name_id", "plant_name", "scientific_name"], identity_insert=True)
+    plant_species_data = [
+        (i + 1, *row) for i, row in enumerate(plant_species.to_records(index=False).tolist())]
+    insert_data(conn, "alpha.plant_species", plant_species_data, [
+                "scientific_name_id", "plant_name", "scientific_name"], identity_insert=True)
 
 
 def insert_plants(conn, df):
     """Insert data into the 'plant' table."""
-    plants = df[["plant_id", "plant_name", "country_name", "botanist_email"]].drop_duplicates()
+    plants = df[["plant_id", "plant_name", "country_name",
+                 "botanist_email"]].drop_duplicates()
 
-    country_map = get_foreign_key_map(conn, "alpha.country", "country_name", "country_id")
-    botanist_map = get_foreign_key_map(conn, "alpha.botanist", "botanist_email", "botanist_id")
-    plant_species_map = get_foreign_key_map(conn, "alpha.plant_species", "plant_name", "scientific_name_id")
+    country_map = get_foreign_key_map(
+        conn, "alpha.country", "country_name", "country_id")
+    botanist_map = get_foreign_key_map(
+        conn, "alpha.botanist", "botanist_email", "botanist_id")
+    plant_species_map = get_foreign_key_map(
+        conn, "alpha.plant_species", "plant_name", "scientific_name_id")
 
     plant_data = [
         (
@@ -98,11 +108,12 @@ def insert_plants(conn, df):
         )
         for _, plant in plants.iterrows()
         if plant["plant_name"] in plant_species_map and
-           plant["country_name"] in country_map and
-           plant["botanist_email"] in botanist_map
+        plant["country_name"] in country_map and
+        plant["botanist_email"] in botanist_map
     ]
 
-    insert_data(conn, "alpha.plant", plant_data, ["plant_id", "scientific_name_id", "country_id", "botanist_id"], identity_insert=True)
+    insert_data(conn, "alpha.plant", plant_data, [
+                "plant_id", "scientific_name_id", "country_id", "botanist_id"], identity_insert=True)
 
 
 def main() -> None:

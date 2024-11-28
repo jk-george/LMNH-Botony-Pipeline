@@ -5,6 +5,7 @@ into an s3 bucket on AWS.
 
 Steps:
 1. Get connection to the database
+
 2. Use a cursor to query all data.
 3. Store data in rows in a csv
 4. Upload the csv onto and s3 instance
