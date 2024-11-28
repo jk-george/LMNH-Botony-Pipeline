@@ -4,6 +4,7 @@ from extract import main_extract
 from transform import main_transform
 from load_sensor_data import main_load
 from email_sender import main_email_alerts
+from invariable_load import main as main_load_inv
 
 
 def run_etl_pipeline():
@@ -15,6 +16,7 @@ def run_etl_pipeline():
 
     main_extract()
     main_transform(raw_csv, cleaned_csv)
+    main_load_inv()
     main_email_alerts()
     main_load(cleaned_csv)
 

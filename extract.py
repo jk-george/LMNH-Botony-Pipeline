@@ -48,7 +48,7 @@ def get_all_keys(data: list) -> list:
     return list(all_keys)
 
 
-def fetch_all_plants(start_id: int = 1, end_id: int = 50) -> list:
+def fetch_all_plants(start_id: int = 1, end_id: int = 10) -> list:
     """Fetch data for all plants within the given ID range."""
     plant_data = []
 
