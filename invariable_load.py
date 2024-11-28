@@ -1,142 +1,126 @@
-"""Script to load all of the data that doesn't change into their respective tables."""
+"""Inserts into invariable tables from csv."""
 
-import os
 import pandas as pd
 import pymssql
 from connect_to_database import get_connection
 
-
-# def get_connection():
-#     """Connect to the AWS RDS Microsoft SQL Server database using pymssql. Returns a connection object."""
-#     try:
-#         conn = pymssql.connect(
-#             server=os.getenv("DB_HOST"),
-#             user=os.getenv("DB_USER"),
-#             password=os.getenv("DB_PASSWORD"),
-#             database=os.getenv("DB_NAME"),
-#             port=int(os.getenv("DB_PORT"))
-#         )
-#         print("Database connection successful.")
-#         return conn
-#     except Exception as e:
-#         print(f"Error connecting to the database: {e}")
-#         exit(1)
-
-
-def insert_data(conn, table: str, data: list, columns: list, identity_insert=False):
-    """Insert data into the specified table."""
-    try:
-        with conn.cursor() as cur:
-
-            if identity_insert:
-                cur.execute(f"SET IDENTITY_INSERT {table} ON;")
-
-            placeholders = ", ".join(["%s" for _ in columns])
-            columns_str = ", ".join(columns)
-            query = f"""
-            INSERT INTO {table} ({columns_str})
-            VALUES ({placeholders});
+def load_plant_species(cursor: pymssql.Cursor, data: pd.DataFrame) -> None:
+    """Loads plant species data into the alpha.plant_species table if not already present."""
+    plant_species = data[['scientific_name', 'plant_name']].drop_duplicates()
+    for _, row in plant_species.iterrows():
+        cursor.execute(
             """
-            cur.executemany(query, data)
-
-            if identity_insert:
-                cur.execute(f"SET IDENTITY_INSERT {table} OFF;")
-
-            conn.commit()
-            print(f"Inserted {len(data)} records into {table}.")
-    except Exception as e:
-        print(f"Error inserting data into {table}: {e}")
-        conn.rollback()
-
-
-def get_foreign_key_map(conn, table: str, key_column: str, value_column: str):
-    """Retrieve a mapping of key-value pairs from a table."""
-    try:
-        with conn.cursor(as_dict=True) as cur:
-            query = f"SELECT {key_column}, {value_column} FROM {table}"
-            cur.execute(query)
-            return {row[key_column]: row[value_column] for row in cur.fetchall()}
-    except Exception as e:
-        print(f"Error fetching data from {table}: {e}")
-        return {}
-
-
-def insert_countries(conn, df):
-    """Insert data into the 'country' table."""
-    countries = df["country_name"].dropna().unique()
-    country_data = [(i + 1, country) for i, country in enumerate(countries)]
-    insert_data(conn, "alpha.country", country_data, [
-                "country_id", "country_name"], identity_insert=True)
-
-
-def insert_botanists(conn, df):
-    """Insert data into the 'botanist' table."""
-    botanists = df[["botanist_email", "botanist_forename",
-                    "botanist_surname", "botanist_phone"]].drop_duplicates()
-    botanist_data = [(i + 1, *row)
-                     for i, row in enumerate(botanists.to_records(index=False).tolist())]
-    insert_data(conn, "alpha.botanist", botanist_data, [
-                "botanist_id", "botanist_email", "botanist_forename", "botanist_surname", "botanist_phone"], identity_insert=True)
-
-
-def insert_plant_species(conn, df):
-    """Insert data into the 'plant_species' table."""
-    plant_species = df[["plant_name", "scientific_name"]].drop_duplicates()
-    plant_species_data = [
-        (i + 1, *row) for i, row in enumerate(plant_species.to_records(index=False).tolist())]
-    insert_data(conn, "alpha.plant_species", plant_species_data, [
-                "scientific_name_id", "plant_name", "scientific_name"], identity_insert=True)
-
-
-def insert_plants(conn, df):
-    """Insert data into the 'plant' table."""
-    plants = df[["plant_id", "plant_name", "country_name",
-                 "botanist_email"]].drop_duplicates()
-
-    country_map = get_foreign_key_map(
-        conn, "alpha.country", "country_name", "country_id")
-    botanist_map = get_foreign_key_map(
-        conn, "alpha.botanist", "botanist_email", "botanist_id")
-    plant_species_map = get_foreign_key_map(
-        conn, "alpha.plant_species", "plant_name", "scientific_name_id")
-
-    plant_data = [
-        (
-            plant["plant_id"],
-            plant_species_map.get(plant["plant_name"]),
-            country_map.get(plant["country_name"]),
-            botanist_map.get(plant["botanist_email"])
+            SELECT scientific_name_id FROM alpha.plant_species
+            WHERE scientific_name = %s
+            """,
+            (row['scientific_name'],)
         )
-        for _, plant in plants.iterrows()
-        if plant["plant_name"] in plant_species_map and
-        plant["country_name"] in country_map and
-        plant["botanist_email"] in botanist_map
-    ]
+        if not cursor.fetchone():
+            cursor.execute(
+                """
+                INSERT INTO alpha.plant_species (scientific_name, plant_name)
+                VALUES (%s, %s)
+                """,
+                (row['scientific_name'], row['plant_name'])
+            )
+            print(f"Inserted plant species: {row['scientific_name']}")
 
-    insert_data(conn, "alpha.plant", plant_data, [
-                "plant_id", "scientific_name_id", "country_id", "botanist_id"], identity_insert=True)
+def load_countries(cursor: pymssql.Cursor, data: pd.DataFrame) -> None:
+    """Loads country data into the alpha.country table if not already present."""
+    countries = data[['country_name']].drop_duplicates()
+    for _, row in countries.iterrows():
+        cursor.execute(
+            """
+            SELECT country_id FROM alpha.country
+            WHERE country_name = %s
+            """,
+            (row['country_name'],)
+        )
+        if not cursor.fetchone():
+            cursor.execute(
+                """
+                INSERT INTO alpha.country (country_name)
+                VALUES (%s)
+                """,
+                (row['country_name'],)
+            )
+            print(f"Inserted country: {row['country_name']}")
 
+def load_botanists(cursor: pymssql.Cursor, data: pd.DataFrame) -> None:
+    """Loads botanist data into the alpha.botanist table if not already present."""
+    botanists = data[['botanist_email', 'botanist_forename', 'botanist_surname', 'botanist_phone']].drop_duplicates()
+    for _, row in botanists.iterrows():
+        cursor.execute(
+            """
+            SELECT botanist_id FROM alpha.botanist
+            WHERE botanist_email = %s
+            """,
+            (row['botanist_email'],)
+        )
+        if not cursor.fetchone():
+            cursor.execute(
+                """
+                INSERT INTO alpha.botanist (botanist_email, botanist_forename, botanist_surname, botanist_phone)
+                VALUES (%s, %s, %s, %s)
+                """,
+                (row['botanist_email'], row['botanist_forename'], row['botanist_surname'], row['botanist_phone'])
+            )
+            print(f"Inserted botanist: {row['botanist_email']}")
+
+def load_plants(cursor: pymssql.Cursor, data: pd.DataFrame) -> None:
+    """Loads plant data into the alpha.plant table if not already present."""
+    plants = data[['plant_id', 'scientific_name', 'country_name', 'botanist_email']].drop_duplicates()
+    for _, row in plants.iterrows():
+        cursor.execute(
+            """
+            SELECT plant_id FROM alpha.plant
+            WHERE plant_id = %s
+            """,
+            (row['plant_id'],)
+        )
+        if not cursor.fetchone():
+            cursor.execute(
+                """
+                SELECT ps.scientific_name_id, c.country_id, b.botanist_id
+                FROM alpha.plant_species ps, alpha.country c, alpha.botanist b
+                WHERE ps.scientific_name = %s AND c.country_name = %s AND b.botanist_email = %s
+                """,
+                (row['scientific_name'], row['country_name'], row['botanist_email'])
+            )
+            result = cursor.fetchone()
+            if result:
+                scientific_name_id, country_id, botanist_id = result
+                cursor.execute(
+                    """
+                    INSERT INTO alpha.plant (plant_id, scientific_name_id, country_id, botanist_id)
+                    VALUES (%s, %s, %s, %s)
+                    """,
+                    (row['plant_id'], scientific_name_id, country_id, botanist_id)
+                )
+                print(f"Inserted plant: {row['plant_id']}, {scientific_name_id}, {country_id}, {botanist_id}")
+            else:
+                print(f"Plant not inserted: No match for {row['scientific_name']}, {row['country_name']}, {row['botanist_email']}")
 
 def main() -> None:
-    """Main function to connect to the database, load the CSV, and insert data into tables."""
+    """Main function to load data into the database."""
+    file_path = "plants_data_cleaned.csv"
+    data = pd.read_csv(file_path)
+
+    conn = get_connection()
+    cursor = conn.cursor()
 
     try:
-        conn = get_connection()
+        load_plant_species(cursor, data)
+        load_countries(cursor, data)
+        load_botanists(cursor, data)
+        load_plants(cursor, data)
+        conn.commit()
     except Exception as e:
-        print(e)
-        exit(1)
-
-    print("Loading data from CSV...")
-    df = pd.read_csv("plants_data_cleaned.csv")
-
-    insert_countries(conn, df)
-    insert_botanists(conn, df)
-    insert_plant_species(conn, df)
-    insert_plants(conn, df)
-
-    conn.close()
-    print("Data insertion completed successfully.")
-
+        print(f"Error occurred: {e}")
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
 
 if __name__ == "__main__":
     main()
