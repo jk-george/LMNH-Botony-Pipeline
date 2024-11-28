@@ -73,7 +73,8 @@ def convert_dates(df: pd.DataFrame) -> pd.DataFrame:
         df['last_watered'] = df['last_watered'].dt.tz_localize(None)
 
     if 'recording_taken' in df.columns:
-        df['recording_taken'] = pd.to_datetime(df['recording_taken'], errors='coerce')
+        df['recording_taken'] = pd.to_datetime(
+            df['recording_taken'], errors='coerce')
         if df['recording_taken'].dt.tz is not None:
             df['recording_taken'] = df['recording_taken'].dt.tz_localize(None)
 
