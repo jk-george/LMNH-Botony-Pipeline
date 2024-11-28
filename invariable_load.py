@@ -3,23 +3,24 @@
 import os
 import pandas as pd
 import pymssql
+from connect_to_database import get_connection
 
 
-def get_connection():
-    """Connect to the AWS RDS Microsoft SQL Server database using pymssql. Returns a connection object."""
-    try:
-        conn = pymssql.connect(
-            server=os.getenv("DB_HOST"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
-            port=int(os.getenv("DB_PORT"))
-        )
-        print("Database connection successful.")
-        return conn
-    except Exception as e:
-        print(f"Error connecting to the database: {e}")
-        exit(1)
+# def get_connection():
+#     """Connect to the AWS RDS Microsoft SQL Server database using pymssql. Returns a connection object."""
+#     try:
+#         conn = pymssql.connect(
+#             server=os.getenv("DB_HOST"),
+#             user=os.getenv("DB_USER"),
+#             password=os.getenv("DB_PASSWORD"),
+#             database=os.getenv("DB_NAME"),
+#             port=int(os.getenv("DB_PORT"))
+#         )
+#         print("Database connection successful.")
+#         return conn
+#     except Exception as e:
+#         print(f"Error connecting to the database: {e}")
+#         exit(1)
 
 
 def insert_data(conn, table: str, data: list, columns: list, identity_insert=False):
@@ -118,7 +119,12 @@ def insert_plants(conn, df):
 
 def main() -> None:
     """Main function to connect to the database, load the CSV, and insert data into tables."""
-    conn = get_connection()
+
+    try:
+        conn = get_connection()
+    except Exception as e:
+        print(e)
+        exit(1)
 
     print("Loading data from CSV...")
     df = pd.read_csv("plants_data_cleaned.csv")
