@@ -99,7 +99,7 @@ def check_and_alert_unhealthy_plants(plant_data_list: list[dict], ses: BaseClien
             logging.error(f"Invalid data format in plant entry: {e}")
 
 
-def main_email_alerts() -> None:
+def main() -> None:
     """Main function to monitor plant health and send alerts."""
     try:
         logging.basicConfig(
