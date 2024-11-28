@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-west-2"  # Specify the AWS region (modify as needed)
+  region = "eu-west-2" 
 }
 
 data "aws_vpc" "VPC" {
@@ -59,7 +59,7 @@ resource "aws_iam_role" "scheduler_ecs_role" {
       {
         Action = "sts:AssumeRole"
         Principal = {
-          Service = "scheduler.amazonaws.com"  # The service assuming the role
+          Service = "scheduler.amazonaws.com" 
         }
         Effect = "Allow"
       }
@@ -94,17 +94,17 @@ resource "aws_iam_role_policy_attachment" "attach_ecs_run_task_policy" {
 }
 
 
-# Attach the necessary policies to the IAM role
+
 resource "aws_iam_role_policy_attachment" "scheduler_ecs_role_policy" {
   role       = aws_iam_role.scheduler_ecs_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"  # Policy for ECS permissions
+  policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"  
 }
 
 
-# Attach the CloudWatch Logs policy if your ECS tasks are writing logs
+
 resource "aws_iam_role_policy_attachment" "scheduler_logs_policy" {
   role       = aws_iam_role.scheduler_ecs_role.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"  # To write logs to CloudWatch Logs
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess" 
 }
 
 resource "aws_iam_role_policy_attachment" "scheduler_container_registry_readonly" {
@@ -189,20 +189,20 @@ resource "aws_scheduler_schedule_group" "connect4-schedule-group" {
 resource "aws_security_group" "task_exec_security_group"{
   name        = "connect4-sg-etl-task"
   description = "Allow inbound HTTPS traffic on port 443 from anywhere"
-  vpc_id      = var.VPC_ID  # Make sure to replace with your actual VPC ID
+  vpc_id      = var.VPC_ID  
 
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Allows inbound HTTPS traffic from any IP
+    cidr_blocks = ["0.0.0.0/0"]  
     ipv6_cidr_blocks = ["::/0"]
   }
 
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"  # Allow all outbound traffic
+    protocol    = "-1"  
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
