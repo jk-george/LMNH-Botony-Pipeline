@@ -14,3 +14,10 @@ resource "aws_ecr_repository" "my_ecr_repo" {
     prevent_destroy = false  # Optional: set to true if you want to prevent accidental deletion
   }
 }
+
+
+resource "aws_s3_bucket" "example" {
+  bucket = var.BUCKET
+  force_destroy = true
+  
+}

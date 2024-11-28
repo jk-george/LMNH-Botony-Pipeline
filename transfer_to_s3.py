@@ -7,41 +7,105 @@ Steps:
 1. Get connection to the database
 
 2. Use a cursor to query all data.
+
 3. Store data in rows in a csv
+
 4. Upload the csv onto and s3 instance
+
+5. Use the cursor to drop all values in the sensor data table.
 
 """
 
-from invariable_load import get_connection
+from os import environ
+import logging
+import io
+import csv
+
+import boto3
+
+from dotenv import load_dotenv
+
 import pymssql
-from pymssql import Cursor
+from pymssql import Connection, Cursor
 
 
 JOIN_TABLES_QUERY = """
 
-
-
-
-
-
+SELECT
+    s.recording_taken,
+    s.last_watered,
+    ps.plant_name,
+    ps.scientific_name,
+    s.soil_moisture,
+    s.temperature,
+    c.country_name,
+    b.botanist_forename,
+    b.botanist_surname
+FROM 
+    alpha.plant_species ps
+JOIN 
+    alpha.plant p ON ps.scientific_name_id = p.scientific_name_id
+JOIN 
+    alpha.sensor_data s ON s.plant_id = p.plant_id
+JOIN 
+    alpha.botanist b ON b.botanist_id = p.botanist_id
+JOIN 
+    alpha.country c ON c.country_id = p.country_id;
 
 """
 
 
-def execute_query(cursor: Cursor):
-    ...
+def get_connection() -> Connection:
+    """Connects to RDS database using credentials"""
+    try:
+        conn = pymssql.connect(
+            server=environ["DB_HOST"],
+            user=environ["DB_USER"],
+            password=environ["DB_PASSWORD"],
+            database=environ["DB_NAME"],
+            port=int(environ["DB_PORT"])
+        )
+        logging.info("Connected to the database successfully.")
+        return conn
+    except Exception as e:
+        logging.error(f"Error connecting to the database: {e}")
+        return None
 
 
-def main() -> None:
+def execute_query(cursor: Cursor, query):
+    """ Returns a list of all outputs from a cursor """
+    cursor.execute(query)
+    return cursor.fetchall()
+
+
+def write_csv_from_query() -> None:
     """ Main function that carries out all steps. """
     conn = get_connection()
+
     with conn.cursor() as db_cursor:
+        joined_database_data = execute_query(db_cursor, JOIN_TABLES_QUERY)
 
-        ...
+    file_buffer = io.StringIO()
 
+    file_writer = csv.writer(file_buffer)
+    file_writer.writerow(["recording_taken", "last_watered", "plant_name",
+                          "scientific_name", "soil_moisture", "temperature",
+                          "country_name", "botanist_forename", "botanist_surname"])
+    file_writer.writerows(joined_database_data)
+    print(file_buffer.getvalue())
     conn.close()
+
+    return file_buffer
+
+
+def send_to_bucket(csv_buffer: io.StringIO) -> None:
+    """ Sends a csv file to an s3 resource """
+    s3_client = boto3.client('s3')
+    bucket_name = environ["BUCKET"]
+    file_address = ""
 
 
 if __name__ == "__main__":
-
+    load_dotenv()
+    write_csv_from_query()
     ...
