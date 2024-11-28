@@ -18,7 +18,7 @@ def get_config() -> dict[str]:
     return {
         'aws_region': os.getenv('AWS_REGION'),
         'ses_sender_email': os.getenv('SES_SENDER_EMAIL'),
-        'csv_file_path': 'plants_data_cleaned.csv',
+        'csv_file_path': os.getenv('FILE_PATH'),
         'soil_moisture_threshold': 50,
         'temperature_threshold': 15,
     }
