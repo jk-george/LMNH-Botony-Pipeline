@@ -11,17 +11,9 @@ import csv
 from dotenv import load_dotenv
 import os
 import logging
+from botocore.client import BaseClient
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='email_sender.log',
-    filemode='a'
-)
-
-load_dotenv()
-
-def get_config():
+def get_config() -> dict[str]:
     """Fetches configuration settings for the application."""
     return {
         'aws_region': os.getenv('AWS_REGION'),
@@ -31,11 +23,11 @@ def get_config():
         'temperature_threshold': 15,
     }
 
-def get_ses_client(aws_region):
+def get_ses_client(aws_region: str) -> BaseClient:
     """Initializes and returns the SES client."""
     return boto3.client('ses', region_name=aws_region)
 
-def read_csv(file_path):
+def read_csv(file_path: str) -> list[dict]:
     """Reads the CSV file and returns a list of plant health data."""
     try:
         with open(file_path, 'r') as csvfile:
@@ -47,7 +39,7 @@ def read_csv(file_path):
         logging.error(f"Failed to read CSV file {file_path}: {e}")
         raise
 
-def send_email_alert(ses, sender_email, receiver_email, plant_data):
+def send_email_alert(ses: BaseClient, sender_email: str, plant_data: dict[str, str]) -> None:
     """Send an alert email to the botanist."""
     subject = f"Plant Health Alert for {plant_data['plant_name']}"
     body = (
@@ -77,14 +69,10 @@ def send_email_alert(ses, sender_email, receiver_email, plant_data):
     except Exception as e:
         logging.error(f"Failed to send email to {plant_data['botanist_email']}: {e}")
 
-def main():
-    """Main function to monitor plant health and send alerts."""
-    try:
-        config = get_config()
-        ses = get_ses_client(config['aws_region'])
-        plant_data_list = read_csv(config['csv_file_path'])
-
-        for plant_data in plant_data_list:
+def check_and_alert_unhealthy_plants(plant_data_list: list[dict], ses: BaseClient, config: dict) -> None:
+    """Checks plant health and sends alerts for unhealthy plants."""
+    for plant_data in plant_data_list:
+        try:
             soil_moisture = float(plant_data['soil_moisture'])
             temperature = float(plant_data['temperature'])
 
@@ -92,14 +80,35 @@ def main():
                 logging.warning(f"Alert: Plant '{plant_data['plant_name']}' requires attention.")
                 send_email_alert(
                     ses, 
-                    config['ses_sender_email'], 
-                    config['ses_receiver_email'], 
+                    config['ses_sender_email'],  
                     plant_data
                 )
             else:
                 logging.info(f"Plant '{plant_data['plant_name']}' is healthy.")
+        except KeyError as e:
+            logging.error(f"Missing expected data in plant entry: {e}")
+        except ValueError as e:
+            logging.error(f"Invalid data format in plant entry: {e}")
+
+def main() -> None:
+    """Main function to monitor plant health and send alerts."""
+    try:
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            filename='email_sender.log',
+            filemode='a'
+        )
+        load_dotenv()
+
+        config = get_config()
+        ses = get_ses_client(config['aws_region'])
+        plant_data_list = read_csv(config['csv_file_path'])
+        check_and_alert_unhealthy_plants(plant_data_list, ses, config)
+
     except Exception as e:
         logging.error(f"Error occurred in main: {e}")
 
 if __name__ == '__main__':
     main()
+
