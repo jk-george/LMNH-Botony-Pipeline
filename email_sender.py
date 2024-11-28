@@ -63,7 +63,8 @@ def send_email_alert(ses: BaseClient, sender_email: str, plant_data: dict[str, s
     try:
         ses.send_email(
             Source=sender_email,
-            Destination={'ToAddresses': [plant_data['botanist_email']]},
+            Destination={'ToAddresses': [
+                'trainee.emily.curtis@sigmalabs.co.uk']},
             Message={
                 'Subject': {'Data': subject},
                 'Body': {'Text': {'Data': body}}
@@ -99,7 +100,7 @@ def check_and_alert_unhealthy_plants(plant_data_list: list[dict], ses: BaseClien
             logging.error(f"Invalid data format in plant entry: {e}")
 
 
-def main() -> None:
+def main_email_alerts() -> None:
     """Main function to monitor plant health and send alerts."""
     try:
         logging.basicConfig(
