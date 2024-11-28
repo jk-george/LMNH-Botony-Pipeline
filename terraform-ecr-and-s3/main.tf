@@ -1,23 +1,32 @@
 provider "aws" {
-  region = "eu-west-2"  # Specify the AWS region (modify as needed)
+  region = "eu-west-2"
 }
 
-# Create an ECR repository
+
 resource "aws_ecr_repository" "my_ecr_repo" {
-  name                 = var.ECR_NAME  # The name of the ECR repository
-  image_tag_mutability = "MUTABLE"        # Options: MUTABLE or IMMUTABLE
+  name                 = var.ECR_NAME  
+  image_tag_mutability = "MUTABLE"  
   image_scanning_configuration {
-    scan_on_push = true  # Enable image scanning on push
+    scan_on_push = true  
   }
 
   lifecycle {
-    prevent_destroy = false  # Optional: set to true if you want to prevent accidental deletion
+    prevent_destroy = false  
   }
 }
 
 
-resource "aws_s3_bucket" "example" {
+resource "aws_s3_bucket" "long_term_storage_bucket" {
   bucket = var.BUCKET
   force_destroy = true
-  
+}
+
+
+resource "aws_s3_bucket_public_access_block" "block_public_access" {
+  bucket = aws_s3_bucket.long_term_storage_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }

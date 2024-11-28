@@ -20,8 +20,10 @@ from os import environ
 import logging
 import io
 import csv
+from datetime import date
 
 import boto3
+from botocore.exceptions import ClientError
 
 from dotenv import load_dotenv
 
@@ -54,6 +56,8 @@ JOIN
 
 """
 
+CSV_FILE_NAME = "data_for_long_term_storage.csv"
+
 
 def get_connection() -> Connection:
     """Connects to RDS database using credentials"""
@@ -85,27 +89,31 @@ def write_csv_from_query() -> None:
     with conn.cursor() as db_cursor:
         joined_database_data = execute_query(db_cursor, JOIN_TABLES_QUERY)
 
-    file_buffer = io.StringIO()
-
-    file_writer = csv.writer(file_buffer)
-    file_writer.writerow(["recording_taken", "last_watered", "plant_name",
-                          "scientific_name", "soil_moisture", "temperature",
-                          "country_name", "botanist_forename", "botanist_surname"])
-    file_writer.writerows(joined_database_data)
-    print(file_buffer.getvalue())
+    with open(CSV_FILE_NAME, 'w+') as csv_file:
+        file_writer = csv.writer(csv_file)
+        file_writer.writerow(["recording_taken", "last_watered", "plant_name",
+                              "scientific_name", "soil_moisture", "temperature",
+                              "country_name", "botanist_forename", "botanist_surname"])
+        file_writer.writerows(joined_database_data)
     conn.close()
 
-    return file_buffer
 
-
-def send_to_bucket(csv_buffer: io.StringIO) -> None:
+def send_to_bucket() -> None:
     """ Sends a csv file to an s3 resource """
     s3_client = boto3.client('s3')
     bucket_name = environ["BUCKET"]
-    file_address = ""
+    today = date.today()
+    file_key = f"{today.year}-{today.month}/{today.day}_plants_data.csv"
+
+    try:
+        s3_client.upload_file(CSV_FILE_NAME, bucket_name, file_key)
+        print(f"CSV file uploaded successfully to {bucket_name}/{file_key}")
+    except ClientError as e:
+        logging.error(f"Error uploading file to S3: {e}")
 
 
 if __name__ == "__main__":
     load_dotenv()
     write_csv_from_query()
+    send_to_bucket()
     ...
