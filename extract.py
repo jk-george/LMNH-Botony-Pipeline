@@ -7,6 +7,7 @@ import argparse
 
 BASE_URL = "https://data-eng-plants-api.herokuapp.com/plants/"
 
+
 def fetch_plant_data(plant_id: int) -> dict:
     """Feetech data for a specific plant by ID from the API specified."""
     url = f"{BASE_URL}{plant_id}"
@@ -21,8 +22,10 @@ def fetch_plant_data(plant_id: int) -> dict:
             botanist_data = plant_data.pop("botanist")
             plant_data["botanist_email"] = botanist_data.get("email", "")
             full_name = botanist_data.get("name", "").split()
-            plant_data["botanist_forename"] = full_name[0] if len(full_name) > 0 else ""
-            plant_data["botanist_surname"] = full_name[1] if len(full_name) > 1 else ""
+            plant_data["botanist_forename"] = full_name[0] if len(
+                full_name) > 0 else ""
+            plant_data["botanist_surname"] = full_name[1] if len(
+                full_name) > 1 else ""
             plant_data["botanist_phone"] = botanist_data.get("phone", "")
 
         if "origin_location" in plant_data:
@@ -33,8 +36,10 @@ def fetch_plant_data(plant_id: int) -> dict:
 
         return plant_data
     else:
-        print(f"Failed to fetch: Plant ID {plant_id}. - (Status Code: {response.status_code})")
+        print(
+            f"Failed to fetch: Plant ID {plant_id}. - (Status Code: {response.status_code})")
         return None
+
 
 def get_all_keys(data: list) -> list:
     all_keys = set()
@@ -42,7 +47,8 @@ def get_all_keys(data: list) -> list:
         all_keys.update(record.keys())
     return list(all_keys)
 
-def fetch_all_plants(start_id: int=1, end_id: int=50) -> list:
+
+def fetch_all_plants(start_id: int = 1, end_id: int = 50) -> list:
     """Fetch data for all plants within the given ID range."""
     plant_data = []
 
@@ -54,17 +60,18 @@ def fetch_all_plants(start_id: int=1, end_id: int=50) -> list:
 
     return plant_data
 
-def export_to_csv(data: list, output_file: str="./plants_data/plants_data.csv") -> None:
+
+def export_to_csv(data: list, output_file: str = "./plants_data/plants_data.csv") -> None:
     """Export the plant data to a CSV file."""
     header_order = [
-        "plant_id", 
-        "plant_name", 
-        "soil_moisture", 
-        "temperature", 
+        "plant_id",
+        "plant_name",
+        "soil_moisture",
+        "temperature",
         "last_watered",
-        "botanist_email", 
-        "botanist_forename", 
-        "botanist_surname", 
+        "botanist_email",
+        "botanist_forename",
+        "botanist_surname",
         "botanist_phone",
         "country_name"
     ]
@@ -82,15 +89,18 @@ def export_to_csv(data: list, output_file: str="./plants_data/plants_data.csv") 
 
     print(f"Data has been saved to '{output_file}'.")
 
+
 def export_to_json(data: list, output_file: str = "./plants_data/plants_data.json") -> None:
     """Export the plant data to a JSON file."""
     with open(output_file, "w") as f:
         json.dump(data, f, indent=4)
     print(f"Data has been saved to '{output_file}'.")
 
+
 def get_arguments() -> argparse.Namespace:
     """Parse and return command-line arguments."""
-    parser = argparse.ArgumentParser(description="Fetch plant data and export to CSV or JSON.")
+    parser = argparse.ArgumentParser(
+        description="Fetch plant data and export to CSV or JSON.")
     parser.add_argument(
         "--format",
         choices=["csv", "json"],
@@ -100,7 +110,8 @@ def get_arguments() -> argparse.Namespace:
 
     return parser.parse_args()
 
-def main() -> None:
+
+def main_extract() -> None:
     """Main function to fetch all plant data and export it based on user argument."""
     os.makedirs("plants_data", exist_ok=True)
 
@@ -117,5 +128,6 @@ def main() -> None:
         print("Exporting to .json:")
         export_to_json(plant_data, output_file)
 
+
 if __name__ == "__main__":
-    main()
+    main_extract()
