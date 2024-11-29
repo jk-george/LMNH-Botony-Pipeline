@@ -3,7 +3,7 @@ import pytest
 import pandas as pd
 from datetime import datetime
 from io import StringIO
-from load_sensor_data import clean_and_prepare_sensor_data, filter_valid_sensor_data
+from pipeline.etl_process.load_sensor_data import clean_and_prepare_sensor_data, filter_valid_sensor_data
 
 CSV_CONTENT = """
 plant_id,recording_taken,soil_moisture,temperature,last_watered
@@ -12,8 +12,10 @@ plant_id,recording_taken,soil_moisture,temperature,last_watered
 3,2023-11-01 09:00:00,25.0,17.0,invalid_date
 """
 
+
 def create_sample_dataframe():
     return pd.read_csv(StringIO(CSV_CONTENT))
+
 
 def test_clean_and_prepare_sensor_data(tmp_path):
     csv_file = tmp_path / "sample.csv"
@@ -23,6 +25,7 @@ def test_clean_and_prepare_sensor_data(tmp_path):
     assert cleaned_df.iloc[0]["plant_id"] == 1
     assert isinstance(cleaned_df.iloc[0]["recording_taken"], datetime)
     assert isinstance(cleaned_df.iloc[0]["last_watered"], datetime)
+
 
 def test_filter_valid_sensor_data():
     df = create_sample_dataframe()
