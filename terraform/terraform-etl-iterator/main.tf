@@ -360,7 +360,7 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
 }
 
 # Scheduler for Long term data transfer
-resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
+resource "aws_scheduler_schedule" "connect4-transfer-scheduler" {
   name       = "connect4-ETL-scheduler"
   group_name = aws_scheduler_schedule_group.connect4-schedule-group.id
 
