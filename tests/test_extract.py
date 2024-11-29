@@ -1,6 +1,7 @@
 import pytest
 import os
-from pipeline.extract import fetch_plant_data, get_all_keys, fetch_all_plants, export_to_csv
+from pipeline.etl_process.extract import fetch_plant_data, get_all_keys, fetch_all_plants, export_to_csv
+
 
 def test_plants_fetch_data():
     plant_id = 1
@@ -8,6 +9,7 @@ def test_plants_fetch_data():
     assert result is not None, "API returned no data."
     assert "plant_name" in result, "Key 'plant_name' missing in result."
     assert "botanist_email" in result, "Key 'botanist_email' missing in result."
+
 
 def test_get_all_keys():
     data = [
@@ -17,10 +19,12 @@ def test_get_all_keys():
     keys = get_all_keys(data)
     assert set(keys) == {"plant_id", "plant_name", "country_name"}
 
+
 def test_fetch_all_plants():
     result = fetch_all_plants(start_id=1, end_id=5)
     assert len(result) > 0, "No plants fetched."
     assert "plant_name" in result[0], "Key 'plant_name' missing in results."
+
 
 def test_export_to_csv(tmp_path):
     data = fetch_all_plants(start_id=1, end_id=3)

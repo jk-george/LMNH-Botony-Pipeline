@@ -1,11 +1,13 @@
 import pandas as pd
 import pytest
 from unittest.mock import MagicMock
-from invariable_load import load_plant_species, load_countries, load_botanists, load_plants
+from pipeline.etl_process.invariable_load import load_plant_species, load_countries, load_botanists, load_plants
+
 
 @pytest.fixture
 def mock_cursor():
     return MagicMock()
+
 
 @pytest.fixture
 def mock_data():
@@ -21,15 +23,17 @@ def mock_data():
     }
     return pd.DataFrame(data)
 
+
 def test_load_plant_species(mock_cursor, mock_data):
     load_plant_species(mock_cursor, mock_data)
     assert mock_cursor.execute.call_count == 2
-   
+
+
 def test_load_countries(mock_cursor, mock_data):
     load_countries(mock_cursor, mock_data)
     assert mock_cursor.execute.call_count == 2
 
+
 def test_load_botanists(mock_cursor, mock_data):
     load_botanists(mock_cursor, mock_data)
     assert mock_cursor.execute.call_count == 2
-

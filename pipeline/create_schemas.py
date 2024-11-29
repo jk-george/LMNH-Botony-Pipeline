@@ -1,7 +1,7 @@
 """Executes schema SQL script to set up the database schema"""
 import logging
 from dotenv import load_dotenv
-from pipeline.connect_to_database import get_connection, get_cursor
+from pipeline.etl_process.connect_to_database import get_connection, get_cursor
 
 
 def configure_logging() -> None:
