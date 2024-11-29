@@ -15,10 +15,10 @@ The primary objective is to build a scalable and efficient cloud-hosted data pip
 
 
 ## Architecture 
-![alt text](image.png)
+![alt text](images/image.png)
 
 ## ERD Diagram
-![alt text](image-5.png)
+![alt text](images/image-5.png)
 
 ## Dashboards
 
