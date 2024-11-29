@@ -122,10 +122,62 @@ resource "aws_iam_role_policy_attachment" "scheduler_vpc_access" {
 
 
 
+# Task for running the ETL
+resource "aws_ecs_task_definition" "etl-task-def" {
+  family                   = "connect4-ETL-task"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 256
+  memory                   = 512
+  execution_role_arn       = aws_iam_role.ecs_role.arn
+  task_role_arn            = aws_iam_role.ecs_role.arn
+  container_definitions    = jsonencode([
+    {
+      name      = var.ECR_NAME
+      image     = format("%s:latest", data.aws_ecr_repository.ETL-ecr-repo.repository_url )
+      essential = true
+      cpu       = 256
+      memory    = 512
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+        },
+        {
+          containerPort = 443
+          hostPort      = 443
+        }
 
+      ]
+      environment = [
+        {
+          name  = "ENV_VAR_NAME"
+          value = "some_value"
+        },
+        {
+          name  = "ANOTHER_ENV_VAR"
+          value = "another_value"
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/connect4-ETL-task"
+          "awslogs-region"        = "eu-west-2"
+          "awslogs-stream-prefix" = "ecs"
+          "awslogs-create-group"  = "true"
+        }
+      }
+    }
+  ])
 
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "X86_64"
+  }
+}
 
-
+# Task that will run the long term storage data transfer.
 resource "aws_ecs_task_definition" "etl-task-def" {
   family                   = "connect4-ETL-task"
   requires_compatibilities = ["FARGATE"]
@@ -207,6 +259,8 @@ resource "aws_security_group" "task_exec_security_group"{
   }
 }
 
+
+# Scheduler for ETL script
 resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
   name       = "connect4-ETL-scheduler"
   group_name = aws_scheduler_schedule_group.connect4-schedule-group.id
@@ -227,6 +281,40 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
       task_count = 1
       launch_type = "FARGATE"
       group = "connect4-ETL-task"
+
+      network_configuration {
+      
+        assign_public_ip    = true
+        subnets             = var.SUBNET_IDS
+        security_groups     = [aws_security_group.task_exec_security_group.id]
+      }
+    }
+
+
+  }
+}
+
+# Scheduler for Long term data transfer
+resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
+  name       = "connect4-ETL-scheduler"
+  group_name = aws_scheduler_schedule_group.connect4-schedule-group.id
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  schedule_expression = "cron(0 0 ? * * *)"
+
+  target {
+    arn      = data.aws_ecs_cluster.ecs_cluster.arn
+    role_arn = aws_iam_role.scheduler_ecs_role.arn
+
+
+    ecs_parameters {
+      task_definition_arn = aws_ecs_task_definition.transfer-task-def.arn
+      task_count = 1
+      launch_type = "FARGATE"
+      group = "connect4-transfer-task"
 
       network_configuration {
       
