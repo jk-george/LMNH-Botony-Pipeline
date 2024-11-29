@@ -5,7 +5,12 @@
 ## Dependencies:
 
 **You must have the following in your terraform.tfvars file before you can use the terraform:**
-- `ECR_NAME` : the name of the ECR, this will be the same as the one from the terraform-ecr folder.
+
+The following **must** be the same as from the `terraform-ecr-and-s3` folder:
+- `ETL_ECR_NAME` 
+- `TRANSFER_DATA_ECR_NAME` 
+
+The following are pre-requisites for this script to run:
 - `VPC_ID` : You must have a VPC and present its ID for use.
 - `ECS_CLUSTER_NAME` : You must have created an ECS Cluster. 
 - `SUBNET_IDS` : Within your VPC you must have created public subnet. Present chosen public subnets in a list - ["Public Subnet 1","Public Subnet 2","Public Subnet 3"].
