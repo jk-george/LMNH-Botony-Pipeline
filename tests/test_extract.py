@@ -1,6 +1,6 @@
 import pytest
 import os
-from extract import fetch_plant_data, get_all_keys, fetch_all_plants, export_to_csv
+from pipeline.extract import fetch_plant_data, get_all_keys, fetch_all_plants, export_to_csv
 
 def test_plants_fetch_data():
     plant_id = 1

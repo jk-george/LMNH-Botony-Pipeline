@@ -96,7 +96,7 @@ def main_email_alerts() -> None:
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s',
-            filename='email_sender.log',
+            filename='./logs/email_sender.log',
             filemode='a'
         )
        
