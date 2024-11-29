@@ -10,7 +10,7 @@ import logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='data_cleaning.log',
+    filename='./logs/data_cleaning.log',
     filemode='a'
 )
 
@@ -145,5 +145,5 @@ def main_transform(input_file: str, output_file: str) -> None:
 
 if __name__ == '__main__':
     input_file = './plants_data/plants_data.csv'
-    output_file = 'plants_data_cleaned.csv'
+    output_file = './plants_data/plants_data_cleaned.csv'
     main_transform(input_file, output_file)

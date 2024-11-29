@@ -103,7 +103,7 @@ def load_plants(cursor: pymssql.Cursor, data: pd.DataFrame) -> None:
 
 def main() -> None:
     """Main function to load data into the database."""
-    file_path = "plants_data_cleaned.csv"
+    file_path = "./plants_data/plants_data_cleaned.csv"
     data = pd.read_csv(file_path)
 
     conn = get_connection()
