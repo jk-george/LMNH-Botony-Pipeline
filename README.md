@@ -91,3 +91,5 @@ SELECT * FROM alpha.botanist;
 SELECT * FROM alpha.plant;
 SELECT * FROM alpha.sensor_data;
 
+- streamlit run streamlit/app.py
+This allows us to see all visualisations created, on a streamlit locally-hosted dashboard.
