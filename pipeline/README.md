@@ -23,8 +23,9 @@ pipeline/
 │   ├── etl.dockerfile           # Dockerfile for containerizing the ETL process.
 │   ├── requirements.txt         # Lists Python dependencies for the ETL process.
 └── scripts/                # Shell scripts for additional automation tasks.
-    ├── dockering_process.sh    # Script for building and running Docker containers.
-    ├── transfer_process.sh     # Script for automating data transfer processes.
+    ├── create_architecture.sh   # Script for setting up the cloud or infrastructure architecture.
+    ├── dockering_process.sh     # Script for building and running Docker containers.
+    ├── ecr_setup.sh             # Script for setting up Amazon Elastic Container Registry (ECR).
 ```
 
 ---
