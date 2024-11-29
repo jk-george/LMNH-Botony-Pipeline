@@ -128,8 +128,8 @@ resource "aws_iam_role_policy_attachment" "scheduler_vpc_access" {
 
 
 # Task for running the ETL
-resource "aws_ecs_task_definition" "transfer-task-def" {
-  family                   = "connect4-transfer-task"
+resource "aws_ecs_task_definition" "etl-task-def" {
+  family                   = "connect4-ETL-task"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 256
@@ -138,8 +138,8 @@ resource "aws_ecs_task_definition" "transfer-task-def" {
   task_role_arn            = aws_iam_role.ecs_role.arn
   container_definitions    = jsonencode([
     {
-      name      = var.ETL_ECR_NAME
-      image     = format("%s:latest", data.aws_ecr_repository.ETL-ecr-repo.repository_url )
+      name      = var.TRANSFER_DATA_ECR_NAME
+      image     = format("%s:latest", data.aws_ecr_repository.transfer-ecr-repo.repository_url )
       essential = true
       cpu       = 256
       memory    = 512
@@ -183,8 +183,8 @@ resource "aws_ecs_task_definition" "transfer-task-def" {
 }
 
 # Task that will run the long term storage data transfer.
-resource "aws_ecs_task_definition" "etl-task-def" {
-  family                   = "connect4-ETL-task"
+resource "aws_ecs_task_definition" "transfer-task-def" {
+  family                   = "connect4-transfer-task"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 256
@@ -193,8 +193,8 @@ resource "aws_ecs_task_definition" "etl-task-def" {
   task_role_arn            = aws_iam_role.ecs_role.arn
   container_definitions    = jsonencode([
     {
-      name      = var.TRANSFER_DATA_ECR_NAME
-      image     = format("%s:latest", data.aws_ecr_repository.transfer-ecr-repo.repository_url )
+      name      = var.ETL_ECR_NAME
+      image     = format("%s:latest", data.aws_ecr_repository.etl-ecr-repo.repository_url )
       essential = true
       cpu       = 256
       memory    = 512
@@ -254,6 +254,20 @@ resource "aws_security_group" "task_exec_security_group"{
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]  
     ipv6_cidr_blocks = ["::/0"]
+  }
+  ingress {
+    from_port   = var.DB_PORT
+    to_port     = var.DB_PORT
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  egress {
+    from_port   = var.DB_PORT
+    to_port     = var.DB_PORT
+    protocol    = "-1"  
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
