@@ -89,32 +89,36 @@ def execute_query(cursor: Cursor, query):
     return cursor.fetchall()
 
 
-def write_csv_from_query(db_cursor: Cursor) -> None:
+def write_csv_from_query(db_cursor: Cursor, file_exists: bool) -> None:
     """ Function that carries out writing csv steps. """
 
     joined_database_data = execute_query(db_cursor, JOIN_TABLES_QUERY)
 
     with open(CSV_FILE_NAME, 'a+') as csv_file:
         file_writer = csv.writer(csv_file)
-        file_writer.writerow(["recording_taken", "last_watered", "plant_name",
-                              "scientific_name", "soil_moisture", "temperature",
-                              "country_name", "botanist_forename", "botanist_surname"])
+        if not file_exists:
+            file_writer.writerow(["recording_taken", "last_watered", "plant_name",
+                                  "scientific_name", "soil_moisture", "temperature",
+                                  "country_name", "botanist_forename", "botanist_surname"])
         file_writer.writerows(joined_database_data)
 
 
-def downloads_csv_file(s3_client: client, bucket_name: str, object_key: str) -> None:
+def downloads_csv_file(s3_client: client, bucket_name: str, object_key: str) -> bool:
     """ If a historical_plants_data.csv exists in the S3 bucket, download it, otherwise create it locally. """
     try:
         s3_client.head_object(Bucket=bucket_name, Key=object_key)
         s3_client.download_file(bucket_name, object_key, object_key)
         print(f"File {object_key} downloaded successfully to this directory.")
+        return True
 
     except ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchKey':
             print(
                 f"Object '{object_key}' does not exist in the bucket '{bucket_name}'.")
+            return False
         else:
             print(f"Error checking object: {e}")
+            return False
 
 
 def send_to_bucket(s3_client: client, bucket_name: str, file_key: str) -> None:
@@ -129,7 +133,7 @@ def send_to_bucket(s3_client: client, bucket_name: str, file_key: str) -> None:
 def clear_sensor_data(cursor: Cursor):
     """Clears sensor data in database table."""
     try:
-        execute_query(cursor, DROP_SENSOR_DATA_QUERY)
+        cursor.execute(DROP_SENSOR_DATA_QUERY)
     except Exception as e:
         raise e
 
@@ -140,11 +144,11 @@ def main_transfer():
     bucket_name = environ["BUCKET"]
     file_key = f"historical_plants_data.csv"
 
-    downloads_csv_file(s3_client, bucket_name, file_key)
+    file_existed = downloads_csv_file(s3_client, bucket_name, file_key)
 
     conn = get_connection()
     with conn.cursor() as cursor:
-        write_csv_from_query(cursor)
+        write_csv_from_query(cursor, file_existed)
 
         send_to_bucket(s3_client, bucket_name, file_key)
 
