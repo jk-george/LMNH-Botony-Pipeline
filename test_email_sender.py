@@ -35,3 +35,4 @@ def test_read_csv(tmp_path):
     assert data[0]['plant_name'] == 'Rose'
     assert data[1]['botanist_surname'] == 'Smith'
     assert float(data[0]['soil_moisture']) == 60
+
