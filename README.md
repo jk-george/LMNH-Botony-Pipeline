@@ -22,6 +22,11 @@ The primary objective is to build a scalable and efficient cloud-hosted data pip
 
 ## Dashboards
 
+**Wireframes**
+![alt text](image-6.png)
+
+![alt text](image-7.png)
+
 **Visitors**
 ![alt text](image-4.png)
 
