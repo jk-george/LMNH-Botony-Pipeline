@@ -141,15 +141,20 @@ Below is the detailed documentation for each file in the pipeline:
 
 
 ### Running the Pipeline on the Cloud
-1. Initialize the database schema by running:
+
+Note: Please do the following while inside the scripts directory.
+
+1. Initialize the database schema  and create the ECRs by running:
    ```bash
-   python create_schemas.py
+   bash ecr_setup.sh
    ```
-2. Create the ECRs:
-Enter into the 
-2. Execute the full pipeline using:
+2. Dockerise and upload the Images of the ETL process and Long Term Data Storage Process using:
+  ```bash
+   bash dockering_process.sh
+   ```
+2. Finally execute the full pipeline using:
    ```bash
-   python etl.py
+   bash create_architecture.sh
    ```
 
 ### Logs
