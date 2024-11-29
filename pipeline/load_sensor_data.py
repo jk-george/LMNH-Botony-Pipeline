@@ -4,7 +4,7 @@ import pandas as pd
 import pymssql
 from typing import Optional, Set
 from pandas import DataFrame
-from pipeline.connect_to_database import get_connection
+from connect_to_database import get_connection
 
 
 def clean_and_prepare_sensor_data(csv_file: str) -> DataFrame:
@@ -86,5 +86,5 @@ def main_load(csv_file: str) -> None:
 
 
 if __name__ == "__main__":
-    csv_file = "plants_data_cleaned.csv"
+    csv_file = "./plants_data/plants_data_cleaned.csv"
     main_load(csv_file)

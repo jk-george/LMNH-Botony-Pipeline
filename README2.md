@@ -35,9 +35,9 @@
 2. **Requirements** Install necessary packages: `pip install -r requirements.txt`.
 
 3. **Database Setup** Ensure your Microsoft SQL Server database is set up: 
-   - To create schemas: `python create_schemas.py`
-   - To seed master data: `python invariable_load.py`
-
+   - To create schemas: `python create_schemas.py` -- Only when required.
+   - To connect to database: `python pipeline/connect_to_database.py` -- Only needs to be ran once per session.
+   - To run full ETL process: `python pipeline/etl.py`
 
 **Useful commands**
 - To connect to the RDS database run `bash connect.sh`

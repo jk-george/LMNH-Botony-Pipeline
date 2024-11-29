@@ -12,7 +12,7 @@ SCHEMA = os.getenv("SCHEMA_NAME")
 def configure_logging() -> None:
     """Configuring logging"""
     logging.basicConfig(
-        filename='db_connection.log',
+        filename='./logs/db_connection.log',
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s'
     )

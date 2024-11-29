@@ -2,7 +2,7 @@
 
 import pandas as pd
 import pymssql
-from pipeline.connect_to_database import get_connection
+from connect_to_database import get_connection
 
 def load_plant_species(cursor: pymssql.Cursor, data: pd.DataFrame) -> None:
     """Loads plant species data into the alpha.plant_species table if not already present."""
@@ -103,7 +103,7 @@ def load_plants(cursor: pymssql.Cursor, data: pd.DataFrame) -> None:
 
 def main() -> None:
     """Main function to load data into the database."""
-    file_path = "plants_data_cleaned.csv"
+    file_path = "./plants_data/plants_data_cleaned.csv"
     data = pd.read_csv(file_path)
 
     conn = get_connection()

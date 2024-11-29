@@ -12,7 +12,7 @@ def run_etl_pipeline():
     load_dotenv()
 
     raw_csv = './plants_data/plants_data.csv'
-    cleaned_csv = 'plants_data_cleaned.csv'
+    cleaned_csv = './plants_data/plants_data_cleaned.csv'
 
     main_extract()
     main_transform(raw_csv, cleaned_csv)
