@@ -1,7 +1,14 @@
-variable ECR_NAME {
+variable TRANSFER_DATA_ECR_NAME {
     type = string
-    description = "Holds the ECR Name."
+    description = "ECR Name for Long term storage transfer"
 }
+
+
+variable ETL_ECR_NAME {
+    type = string
+    description = "ECR name for ETL process"
+}
+
 
 
 variable ECS_CLUSTER_NAME {

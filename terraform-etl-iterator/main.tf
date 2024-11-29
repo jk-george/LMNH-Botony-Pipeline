@@ -7,8 +7,13 @@ data "aws_vpc" "VPC" {
 }
 
 data "aws_ecr_repository" "ETL-ecr-repo" {
-    name = var.ECR_NAME
+    name = var.ETL_ECR_NAME
 }
+
+data "aws_ecr_repository" "transfer-ecr-repo" {
+    name = var.TRANSFER_DATA_ECR_NAME
+}
+
 
 data "aws_ecs_cluster" "ecs_cluster" {
   cluster_name = var.ECS_CLUSTER_NAME
@@ -123,8 +128,8 @@ resource "aws_iam_role_policy_attachment" "scheduler_vpc_access" {
 
 
 # Task for running the ETL
-resource "aws_ecs_task_definition" "etl-task-def" {
-  family                   = "connect4-ETL-task"
+resource "aws_ecs_task_definition" "transfer-task-def" {
+  family                   = "connect4-transfer-task"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 256
@@ -133,7 +138,7 @@ resource "aws_ecs_task_definition" "etl-task-def" {
   task_role_arn            = aws_iam_role.ecs_role.arn
   container_definitions    = jsonencode([
     {
-      name      = var.ECR_NAME
+      name      = var.ETL_ECR_NAME
       image     = format("%s:latest", data.aws_ecr_repository.ETL-ecr-repo.repository_url )
       essential = true
       cpu       = 256
@@ -188,8 +193,8 @@ resource "aws_ecs_task_definition" "etl-task-def" {
   task_role_arn            = aws_iam_role.ecs_role.arn
   container_definitions    = jsonencode([
     {
-      name      = var.ECR_NAME
-      image     = format("%s:latest", data.aws_ecr_repository.ETL-ecr-repo.repository_url )
+      name      = var.TRANSFER_DATA_ECR_NAME
+      image     = format("%s:latest", data.aws_ecr_repository.transfer-ecr-repo.repository_url )
       essential = true
       cpu       = 256
       memory    = 512
@@ -217,7 +222,7 @@ resource "aws_ecs_task_definition" "etl-task-def" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = "/ecs/connect4-ETL-task"
+          "awslogs-group"         = "/ecs/connect4-transfer-task"
           "awslogs-region"        = "eu-west-2"
           "awslogs-stream-prefix" = "ecs"
           "awslogs-create-group"  = "true"
