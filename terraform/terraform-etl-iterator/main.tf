@@ -6,7 +6,7 @@ data "aws_vpc" "VPC" {
   id = var.VPC_ID
 }
 
-data "aws_ecr_repository" "ETL-ecr-repo" {
+data "aws_ecr_repository" "etl-ecr-repo" {
     name = var.ETL_ECR_NAME
 }
 
