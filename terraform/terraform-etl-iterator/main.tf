@@ -138,8 +138,8 @@ resource "aws_ecs_task_definition" "etl-task-def" {
   task_role_arn            = aws_iam_role.ecs_role.arn
   container_definitions    = jsonencode([
     {
-      name      = var.TRANSFER_DATA_ECR_NAME
-      image     = format("%s:latest", data.aws_ecr_repository.transfer-ecr-repo.repository_url )
+      name      = var.ETL_ECR_NAME
+      image     = format("%s:latest", data.aws_ecr_repository.etl-ecr-repo.repository_url )
       essential = true
       cpu       = 256
       memory    = 512
@@ -152,7 +152,6 @@ resource "aws_ecs_task_definition" "etl-task-def" {
           containerPort = 443
           hostPort      = 443
         }
-
       ]
       environment = [
         {
@@ -178,6 +177,22 @@ resource "aws_ecs_task_definition" "etl-task-def" {
         {
           name  = "BUCKET"
           value = var.BUCKET
+        },
+        {
+          name  = "FILE_PATH"
+          value = var.FILE_PATH
+        },
+        {
+          name  = "SES_RECEIVER_EMAIL"
+          value = var.SES_RECEIVER_EMAIL
+        },
+        {
+          name  = "AWS_REGION"
+          value = var.AWS_REGION
+        },
+        {
+          name  = "SES_SENDER_EMAIL"
+          value = var.SES_SENDER_EMAIL
         }
       ]
       logConfiguration = {
@@ -209,8 +224,8 @@ resource "aws_ecs_task_definition" "transfer-task-def" {
   task_role_arn            = aws_iam_role.ecs_role.arn
   container_definitions    = jsonencode([
     {
-      name      = var.ETL_ECR_NAME
-      image     = format("%s:latest", data.aws_ecr_repository.etl-ecr-repo.repository_url )
+      name      = var.TRANSFER_DATA_ECR_NAME
+      image     = format("%s:latest", data.aws_ecr_repository.transfer-ecr-repo.repository_url)
       essential = true
       cpu       = 256
       memory    = 512
@@ -223,7 +238,6 @@ resource "aws_ecs_task_definition" "transfer-task-def" {
           containerPort = 443
           hostPort      = 443
         }
-
       ]
       environment = [
         {
