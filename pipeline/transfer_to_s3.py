@@ -123,11 +123,20 @@ def clear_sensor_data(cursor: Cursor):
         raise e
 
 
-if __name__ == "__main__":
-    load_dotenv()
+def main_transfer():
+    """ Main transfer function that executes the whole process """
     conn = get_connection()
-    cursor = conn.cursor()
-    write_csv_from_query(cursor)
-    send_to_bucket()
+
+    with conn.cursor() as cursor:
+        write_csv_from_query(cursor)
+        send_to_bucket()
+        clear_sensor_data(cursor)
+
+    conn.commit()
     conn.close()
+
+
+if __name__ == "__main__":
+    load_dotenv
+    main_transfer()
     ...
