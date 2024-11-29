@@ -24,6 +24,7 @@ from datetime import date
 
 import boto3
 from botocore.exceptions import ClientError
+from botocore import client
 
 from dotenv import load_dotenv
 
@@ -56,6 +57,12 @@ JOIN
 
 """
 
+DROP_SENSOR_DATA_QUERY = """
+
+TRUNCATE TABLE alpha.sensor_data
+
+"""
+
 CSV_FILE_NAME = "data_for_long_term_storage.csv"
 
 
@@ -82,29 +89,36 @@ def execute_query(cursor: Cursor, query):
     return cursor.fetchall()
 
 
-def write_csv_from_query() -> None:
-    """ Main function that carries out all steps. """
-    conn = get_connection()
+def write_csv_from_query(db_cursor: Cursor) -> None:
+    """ Function that carries out writing csv steps. """
 
-    with conn.cursor() as db_cursor:
-        joined_database_data = execute_query(db_cursor, JOIN_TABLES_QUERY)
+    joined_database_data = execute_query(db_cursor, JOIN_TABLES_QUERY)
 
-    with open(CSV_FILE_NAME, 'w+') as csv_file:
+    with open(CSV_FILE_NAME, 'a+') as csv_file:
         file_writer = csv.writer(csv_file)
         file_writer.writerow(["recording_taken", "last_watered", "plant_name",
                               "scientific_name", "soil_moisture", "temperature",
                               "country_name", "botanist_forename", "botanist_surname"])
         file_writer.writerows(joined_database_data)
-    conn.close()
 
 
-def send_to_bucket() -> None:
+def downloads_csv_file(s3_client: client, bucket_name: str, object_key: str) -> None:
+    """ If a historical_plants_data.csv exists in the S3 bucket, download it, otherwise create it locally. """
+    try:
+        s3_client.head_object(Bucket=bucket_name, Key=object_key)
+        s3_client.download_file(bucket_name, object_key, object_key)
+        print(f"File {object_key} downloaded successfully to this directory.")
+
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'NoSuchKey':
+            print(
+                f"Object '{object_key}' does not exist in the bucket '{bucket_name}'.")
+        else:
+            print(f"Error checking object: {e}")
+
+
+def send_to_bucket(s3_client: client, bucket_name: str, file_key: str) -> None:
     """ Sends a csv file to an s3 resource """
-    s3_client = boto3.client('s3')
-    bucket_name = environ["BUCKET"]
-    today = date.today()
-    file_key = f"{today.year}-{today.month}/{today.day}_plants_data.csv"
-
     try:
         s3_client.upload_file(CSV_FILE_NAME, bucket_name, file_key)
         print(f"CSV file uploaded successfully to {bucket_name}/{file_key}")
@@ -112,8 +126,35 @@ def send_to_bucket() -> None:
         logging.error(f"Error uploading file to S3: {e}")
 
 
+def clear_sensor_data(cursor: Cursor):
+    """Clears sensor data in database table."""
+    try:
+        execute_query(cursor, DROP_SENSOR_DATA_QUERY)
+    except Exception as e:
+        raise e
+
+
+def main_transfer():
+    """ Main transfer function that executes the whole process """
+    s3_client = boto3.client('s3')
+    bucket_name = environ["BUCKET"]
+    file_key = f"historical_plants_data.csv"
+
+    downloads_csv_file(s3_client, bucket_name, file_key)
+
+    conn = get_connection()
+    with conn.cursor() as cursor:
+        write_csv_from_query(cursor)
+
+        send_to_bucket(s3_client, bucket_name, file_key)
+
+        clear_sensor_data(cursor)
+
+    conn.commit()
+    conn.close()
+
+
 if __name__ == "__main__":
-    load_dotenv()
-    write_csv_from_query()
-    send_to_bucket()
+    load_dotenv
+    main_transfer()
     ...
