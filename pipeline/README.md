@@ -7,16 +7,20 @@ This directory of the repository contains an ETL (Extract, Transform, Load) pipe
 
 ```
 pipeline/
-├── connect_to_database.py   # Handles database connections and cursors.
+├── create_schemas.py        # Script to execute schema.sql and set up the database.
 ├── connect.sh               # Shell script for connecting to the database.
 ├── schema.sql               # SQL file defining the database schema.
-├── create_schemas.py        # Script to execute schema.sql and set up the database.
-├── extract.py               # Script for extracting data from an API to CSV/JSON.
-├── transform.py             # Cleans and transforms raw data for loading.
-├── invariable_load.py       # Loads static data (e.g., species, countries) into the database.
-├── email_sender.py          # Sends email alerts for unhealthy plants.
-├── load_sensor_data.py      # Loads variable sensor data into the database.
-└── etl.py                   # Orchestrates the complete ETL pipeline.
+├── transfer_to_s3.py        # Python file that will send all data from the database into and S3.
+└── etl_process/
+  ├── connect_to_database.py   # Handles database connections and cursors.  
+  ├── etl.py                   # Orchestrates the complete ETL pipeline.
+  ├── create_schemas.py        # Script to execute schema.sql and set up the database.
+  ├── extract.py               # Script for extracting data from an API to CSV/JSON.
+  ├── transform.py             # Cleans and transforms raw data for loading.
+  ├── invariable_load.py       # Loads static data (e.g., species, countries) into the database.
+  ├── email_sender.py          # Sends email alerts for unhealthy plants.
+  └── load_sensor_data.py      # Loads variable sensor data into the database.
+
 ```
 
 ---
