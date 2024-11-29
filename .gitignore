@@ -102,8 +102,10 @@ plants_data_*
 *.log
 
 data_for_long_term_storage.csv
+
 historical_plants_data.csv
 
 .png
 image*
+
 
