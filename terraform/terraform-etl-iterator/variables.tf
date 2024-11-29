@@ -60,3 +60,22 @@ variable BUCKET {
     type = string
     description = "Holds the Bucket name for files to be sent to."
 }
+
+variable AWS_REGION {
+    type = string
+    description = "Holds the AWS region we're in"
+}
+variable SES_SENDER_EMAIL {
+    type = string
+    description = "Email of Sender"
+}
+
+variable SES_RECEIVER_EMAIL {
+    type = string
+    description = "email of receiver"
+}
+
+variable FILE_PATH {
+    type = string
+    description = "cleaned data file path"
+}

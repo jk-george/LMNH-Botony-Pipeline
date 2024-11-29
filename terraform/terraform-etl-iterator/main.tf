@@ -156,12 +156,28 @@ resource "aws_ecs_task_definition" "etl-task-def" {
       ]
       environment = [
         {
-          name  = "ENV_VAR_NAME"
-          value = "some_value"
+          name  = "DB_HOST"
+          value = var.DB_HOST
         },
         {
-          name  = "ANOTHER_ENV_VAR"
-          value = "another_value"
+          name  = "DB_USER"
+          value = var.DB_USER
+        },
+        {
+          name  = "DB_PASSWORD"
+          value = var.DB_PASSWORD
+        },
+        {
+          name  = "DB_NAME"
+          value = var.DB_NAME
+        },
+        {
+          name  = "DB_PORT"
+          value = var.DB_PORT
+        },
+        {
+          name  = "BUCKET"
+          value = var.BUCKET
         }
       ]
       logConfiguration = {
