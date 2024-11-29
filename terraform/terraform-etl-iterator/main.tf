@@ -6,7 +6,7 @@ data "aws_vpc" "VPC" {
   id = var.VPC_ID
 }
 
-data "aws_ecr_repository" "ETL-ecr-repo" {
+data "aws_ecr_repository" "etl-ecr-repo" {
     name = var.ETL_ECR_NAME
 }
 
@@ -312,7 +312,7 @@ resource "aws_security_group" "task_exec_security_group"{
   egress {
     from_port   = var.DB_PORT
     to_port     = var.DB_PORT
-    protocol    = "-1"  
+    protocol    = "tcp"  
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -360,8 +360,8 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
 }
 
 # Scheduler for Long term data transfer
-resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
-  name       = "connect4-ETL-scheduler"
+resource "aws_scheduler_schedule" "connect4-transfer-scheduler" {
+  name       = "connect4-transfer-scheduler"
   group_name = aws_scheduler_schedule_group.connect4-schedule-group.id
 
   flexible_time_window {
