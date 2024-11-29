@@ -1,5 +1,41 @@
 # This readme is for the set up at the start of the project, ensuring you have all the correct installations
 
+
+## Project Overview: Liverpool Natural History Museum Plant Health Monitoring
+**Introduction**
+The Liverpool Natural History Museum (LNMH) has embarked on an exciting initiative to monitor the health of plants in its newly opened botanical wing. This wing highlights the diversity and importance of regional plant life, drawing interest from families, students, and researchers alike. 
+To support the maintenance of its plant conservatory, LNMH seeks to implement a robust system to monitor plant health, leveraging sensors and cloud-based solutions to address challenges faced by their gardening team.
+
+**Project Goals**
+The primary objective is to build a scalable and efficient cloud-hosted data pipeline to track and monitor the health of plants in real-time and over time. The solution aims to:
+
+- Retrieve, clean, and store sensor data efficiently.
+- Alert gardeners to potential plant health issues.
+- Provide actionable insights through visualizations.
+
+
+## Architecture 
+![alt text](image.png)
+
+## ERD Diagram
+![alt text](image-5.png)
+
+## Dashboards
+
+**Wireframes**
+![alt text](image-6.png)
+
+![alt text](image-7.png)
+
+**Visitors**
+![alt text](image-4.png)
+
+
+**Staff**
+![alt text](image-3.png)
+![alt text](image-1.png)
+
+
 ## 🛠️ Getting Setup
 
 **Python version and environment**
