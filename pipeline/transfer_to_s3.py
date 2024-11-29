@@ -56,6 +56,12 @@ JOIN
 
 """
 
+DROP_SENSOR_DATA_QUERY = """
+
+TRUNCATE TABLE alpha.sensor_data
+
+"""
+
 CSV_FILE_NAME = "data_for_long_term_storage.csv"
 
 
@@ -82,12 +88,10 @@ def execute_query(cursor: Cursor, query):
     return cursor.fetchall()
 
 
-def write_csv_from_query() -> None:
-    """ Main function that carries out all steps. """
-    conn = get_connection()
+def write_csv_from_query(db_cursor: Cursor) -> None:
+    """ Function that carries out writing csv steps. """
 
-    with conn.cursor() as db_cursor:
-        joined_database_data = execute_query(db_cursor, JOIN_TABLES_QUERY)
+    joined_database_data = execute_query(db_cursor, JOIN_TABLES_QUERY)
 
     with open(CSV_FILE_NAME, 'w+') as csv_file:
         file_writer = csv.writer(csv_file)
@@ -95,7 +99,6 @@ def write_csv_from_query() -> None:
                               "scientific_name", "soil_moisture", "temperature",
                               "country_name", "botanist_forename", "botanist_surname"])
         file_writer.writerows(joined_database_data)
-    conn.close()
 
 
 def send_to_bucket() -> None:
@@ -112,8 +115,19 @@ def send_to_bucket() -> None:
         logging.error(f"Error uploading file to S3: {e}")
 
 
+def clear_sensor_data(cursor: Cursor):
+    """Clears sensor data in database table."""
+    try:
+        execute_query(cursor, DROP_SENSOR_DATA_QUERY)
+    except Exception as e:
+        raise e
+
+
 if __name__ == "__main__":
     load_dotenv()
-    write_csv_from_query()
+    conn = get_connection()
+    cursor = conn.cursor()
+    write_csv_from_query(cursor)
     send_to_bucket()
+    conn.close()
     ...
