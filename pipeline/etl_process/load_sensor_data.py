@@ -7,11 +7,6 @@ from typing import Optional, Set
 from pandas import DataFrame
 from connect_to_database import get_connection
 
-logging.basicConfig(
-    filename="sensor_data_processing.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
 
 def clean_and_prepare_sensor_data(csv_file: str) -> DataFrame:
     """Load and clean the sensor data from a CSV file."""
@@ -93,6 +88,11 @@ def insert_sensor_data(conn: pymssql.Connection, sensor_data_df: DataFrame) -> N
 
 def main_load(csv_file: str) -> None:
     """Main function to load, clean, validate, and insert sensor data into the database."""
+    logging.basicConfig(
+        filename="sensor_data_processing.log",
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+    )
     logging.info("Starting main process for sensor data processing.")
     conn = get_connection()
     if conn is None:
