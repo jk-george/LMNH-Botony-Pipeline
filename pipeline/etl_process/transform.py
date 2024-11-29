@@ -4,15 +4,11 @@ This function reads data from the specified input CSV file, performs
 necessary transformations and cleaning operations, and then writes
 the cleaned data to the specified output CSV file.
 """
-import pandas as pd
-import logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='./logs/data_cleaning.log',
-    filemode='a'
-)
+import logging
+import os
+
+import pandas as pd
 
 
 def load_data(input_file: str) -> pd.DataFrame:
@@ -124,6 +120,13 @@ def save_data(df: pd.DataFrame, output_file: str) -> None:
 
 def main_transform(input_file: str, output_file: str) -> None:
     """Main function to carry out the transformation process."""
+    if not os.path.exists("./logs"):
+        os.mkdir("./logs")
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        filename='./logs/data_cleaning.log'
+    )
     logging.info("Data cleaning process started.")
     try:
         df = load_data(input_file)
