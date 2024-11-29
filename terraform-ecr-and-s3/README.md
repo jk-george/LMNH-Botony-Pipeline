@@ -15,4 +15,4 @@ It **must** contain:
 - `BUCKET` = "Bucket Name for Long Term Data to be sent to"
 
 
-After creating this terraform.tfvars file, you must include `ETL_ECR_NAME` and `TRANSFER_DATA_ECR_NAME` in the terraform.tfvars file inside of the terraform-etl-iterator file.
+After creating this terraform.tfvars file, you must include `ETL_ECR_NAME`, `TRANSFER_DATA_ECR_NAME` and `BUCKET` in the terraform.tfvars file inside of the terraform-etl-iterator file.

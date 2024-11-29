@@ -55,3 +55,8 @@ variable SCHEMA_NAME {
     type = string
     description = "Name of the schema for the database"
 }
+
+variable BUCKET {
+    type = string
+    description = "Holds the Bucket name for files to be sent to."
+}
