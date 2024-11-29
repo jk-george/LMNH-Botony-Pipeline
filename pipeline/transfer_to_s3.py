@@ -18,7 +18,6 @@ Steps:
 
 from os import environ
 import logging
-import io
 import csv
 from datetime import date
 
