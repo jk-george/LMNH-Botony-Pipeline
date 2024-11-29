@@ -114,10 +114,10 @@ def downloads_csv_file(s3_client: client, bucket_name: str, object_key: str) -> 
         if e.response['Error']['Code'] == 'NoSuchKey':
             print(
                 f"Object '{object_key}' does not exist in the bucket '{bucket_name}'.")
-            return False
         else:
             print(f"Error checking object: {e}")
-            return False
+        print("Creating a new historical_plants_data.csv file.")
+        return False
 
 
 def send_to_bucket(s3_client: client, bucket_name: str, file_key: str) -> None:
