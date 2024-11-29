@@ -30,7 +30,6 @@ The primary objective is to build a scalable and efficient cloud-hosted data pip
 **Visitors**
 ![alt text](image-4.png)
 
-
 **Staff**
 ![alt text](image-3.png)
 ![alt text](image-1.png)
