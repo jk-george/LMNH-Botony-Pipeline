@@ -2,7 +2,7 @@
 
 import pandas as pd
 import pymssql
-from connect_to_database import get_connection
+from pipeline.connect_to_database import get_connection
 
 def load_plant_species(cursor: pymssql.Cursor, data: pd.DataFrame) -> None:
     """Loads plant species data into the alpha.plant_species table if not already present."""
