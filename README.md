@@ -14,10 +14,11 @@ The primary objective is to build a scalable and efficient cloud-hosted data pip
 - Provide actionable insights through visualizations.
 
 
-## Architecture 
+
+## Architecture
 ![alt text](images/image.png)
 
-## ERD Diagram
+## ERD Diagram 
 ![alt text](images/image-5.png)
 
 ## Dashboards
@@ -89,20 +90,4 @@ SELECT * FROM alpha.country;
 SELECT * FROM alpha.botanist;
 SELECT * FROM alpha.plant;
 SELECT * FROM alpha.sensor_data;
-
-## 🗂️ Files Explained
-Things to Know for **extract.py**
-
-- This script uses `argparse` for option to output to either a `.csv` or a `.json`.
-If left empty, the script will output to .csv by default.
-
-```
-python3 extract.py --format [csv or json]
-```
-
-- In the arguments of this function you can specify how many rows you want by altering the `end_id`.
-
-```
-def fetch_all_plants(start_id=1, end_id=50):
-```
 

@@ -10,17 +10,21 @@ pipeline/
 ├── create_schemas.py        # Script to execute schema.sql and set up the database.
 ├── connect.sh               # Shell script for connecting to the database.
 ├── schema.sql               # SQL file defining the database schema.
-├── transfer_to_s3.py        # Python file that will send all data from the database into and S3.
-└── etl_process/
-  ├── connect_to_database.py   # Handles database connections and cursors.  
-  ├── etl.py                   # Orchestrates the complete ETL pipeline.
-  ├── create_schemas.py        # Script to execute schema.sql and set up the database.
-  ├── extract.py               # Script for extracting data from an API to CSV/JSON.
-  ├── transform.py             # Cleans and transforms raw data for loading.
-  ├── invariable_load.py       # Loads static data (e.g., species, countries) into the database.
-  ├── email_sender.py          # Sends email alerts for unhealthy plants.
-  └── load_sensor_data.py      # Loads variable sensor data into the database.
-
+├── transfer_to_s3.py        # Python script to transfer all data from the database to S3.
+├── README.md                # Documentation for the project.
+├── etl_process/             # Contains scripts for the ETL pipeline.
+│   ├── connect_to_database.py   # Handles database connections and cursors.
+│   ├── etl.py                   # Orchestrates the complete ETL pipeline.
+│   ├── extract.py               # Script for extracting data from an API to CSV/JSON.
+│   ├── transform.py             # Cleans and transforms raw data for loading.
+│   ├── invariable_load.py       # Loads static data (e.g., species, countries) into the database.
+│   ├── load_sensor_data.py      # Loads variable sensor data into the database.
+│   ├── email_sender.py          # Sends email alerts for unhealthy plants.
+│   ├── etl.dockerfile           # Dockerfile for containerizing the ETL process.
+│   ├── requirements.txt         # Lists Python dependencies for the ETL process.
+└── scripts/                # Shell scripts for additional automation tasks.
+    ├── dockering_process.sh    # Script for building and running Docker containers.
+    ├── transfer_process.sh     # Script for automating data transfer processes.
 ```
 
 ---
@@ -136,14 +140,21 @@ Below is the detailed documentation for each file in the pipeline:
 - Install required Python packages using `pip install -r requirements.txt`.
 
 
-### Running the Pipeline
-1. Initialize the database schema by running:
+### Running the Pipeline on the Cloud
+
+Note: Please do the following while inside the scripts directory.
+
+1. Initialize the database schema  and create the ECRs by running:
    ```bash
-   python create_schemas.py
+   bash ecr_setup.sh
    ```
-2. Execute the full pipeline using:
+2. Dockerise and upload the Images of the ETL process and Long Term Data Storage Process using:
+  ```bash
+   bash dockering_process.sh
+   ```
+2. Finally execute the full pipeline using:
    ```bash
-   python etl.py
+   bash create_architecture.sh
    ```
 
 ### Logs
