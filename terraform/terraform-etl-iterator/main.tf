@@ -312,7 +312,7 @@ resource "aws_security_group" "task_exec_security_group"{
   egress {
     from_port   = var.DB_PORT
     to_port     = var.DB_PORT
-    protocol    = "-1"  
+    protocol    = "tcp"  
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -361,7 +361,7 @@ resource "aws_scheduler_schedule" "connect4-ETL-scheduler" {
 
 # Scheduler for Long term data transfer
 resource "aws_scheduler_schedule" "connect4-transfer-scheduler" {
-  name       = "connect4-ETL-scheduler"
+  name       = "connect4-transfer-scheduler"
   group_name = aws_scheduler_schedule_group.connect4-schedule-group.id
 
   flexible_time_window {
