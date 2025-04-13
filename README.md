@@ -1,4 +1,4 @@
-# This readme is for the set up at the start of the project, ensuring you have all the correct installations
+# 🌱 LMNH Botany Pipeline
 
 
 ## Project Overview: Liverpool Natural History Museum Plant Health Monitoring
